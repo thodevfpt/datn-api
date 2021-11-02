@@ -21,5 +21,9 @@ class Product extends Model
         'description'
        
     ];
+
+    // public function category(){
+    //     return $this->belongsTo(Category::class,'cate_id');
+    //  }
     
 }
