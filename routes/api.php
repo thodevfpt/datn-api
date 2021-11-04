@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InfoUserController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\CategoriesApi;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 
@@ -48,6 +47,32 @@ Route::prefix('product')->group(function () {
     Route::options('backup-one/{id}',[ProductController::class,'backupOne']);
     // backup tất cả các sp đã bị xóa mềm
     Route::options('backup-all',[ProductController::class,'backupAll']);
+
+});
+
+Route::prefix('categories')->group(function () {
+    // thêm mới 1 dm: ok
+    Route::post('add', [CategoryController::class, 'add']);
+    // cập nhật 1 dm: ok
+    Route::put('update/{id}', [CategoryController::class, 'update']);
+    // xóa mềm 1 dm
+    Route::delete('delete/{id}', [CategoryController::class, 'delete']);
+    // xóa vĩnh viễn 1 dm: ok
+    Route::delete('force-delete/{id}', [CategoryController::class, 'forceDelete']);
+    // xóa vĩnh viễn tất cả các dm đã bị xóa mềm
+    Route::options('force-delete/all', [CategoryController::class, 'forceDeleteAll']);
+    // danh sách tất cả các dm chưa bị xóa mềm: ok
+    Route::get('all', [CategoryController::class, 'index']);
+    // danh sách tất cả các dm đã bị xóa mềm
+    Route::get('deleted', [CategoryController::class, 'deleted']);
+    // chi tiết 1 dm: ok
+    Route::get('detail/{id}', [CategoryController::class, 'detail']);
+    // backup 1 dm đã bị xóa mềm
+    Route::options('backup-one/{id}',[CategoryController::class,'backupOne']);
+    // backup tất cả các dm đã bị xóa mềm
+    Route::options('backup-all',[CategoryController::class,'backupAll']);
+    // lấy tất cả sp trong dm theo id
+    // Route::get('product/{id}',[CategoryController::class,'listProduct']);
 
 });
 
@@ -113,52 +138,30 @@ Route::get('logout',[LoginController::class,'logout']);
 
 
 
-Route::prefix('categories')->group(function () {
-    // thêm mới 1 sp
-    Route::post('add', [CategoryController::class, 'add']);
-    // cập nhật 1 sp
-    Route::put('update/{id}', [CategoryController::class, 'update']);
-    // xóa mềm 1 sp
-    Route::delete('delete/{id}', [CategoryController::class, 'delete']);
-    // xóa vĩnh viễn 1 sp
-    Route::delete('force-delete/{id}', [CategoryController::class, 'forceDelete']);
-    // xóa vĩnh viễn tất cả các sp đã bị xóa mềm
-    Route::options('force-delete/all', [CategoryController::class, 'forceDeleteAll']);
-    // danh sách tất cả các sp chưa bị xóa mềm
-    Route::get('all', [CategoryController::class, 'index']);
-    // danh sách tất cả các sp đã bị xóa mềm
-    Route::get('deleted', [CategoryController::class, 'deleted']);
-    // chi tiết 1 sp
-    Route::get('detail/{id}', [CategoryController::class, 'detail']);
-    // backup 1 sp đã bị xóa mềm
-    Route::options('backup-one/{id}',[CategoryController::class,'backupOne']);
-    // backup tất cả các sp đã bị xóa mềm
-    Route::options('backup-all',[CategoryController::class,'backupAll']);
 
-});
 
 
 
 Route::prefix('comments')->group(function () {
-    // thêm mới 1 sp
+    // thêm mới 1 dm
     Route::post('add', [CommentController::class, 'add']);
-    // cập nhật 1 sp
+    // cập nhật 1 dm
     Route::put('update/{id}', [CommentController::class, 'update']);
-    // xóa mềm 1 sp
+    // xóa mềm 1 dm
     Route::delete('delete/{id}', [CommentController::class, 'delete']);
-    // xóa vĩnh viễn 1 sp
+    // xóa vĩnh viễn 1 dm
     Route::delete('force-delete/{id}', [CommentController::class, 'forceDelete']);
-    // xóa vĩnh viễn tất cả các sp đã bị xóa mềm
+    // xóa vĩnh viễn tất cả các dm đã bị xóa mềm
     Route::options('force-delete/all', [CommentController::class, 'forceDeleteAll']);
-    // danh sách tất cả các sp chưa bị xóa mềm
+    // danh sách tất cả các dm chưa bị xóa mềm
     Route::get('all', [CommentController::class, 'index']);
-    // danh sách tất cả các sp đã bị xóa mềm
+    // danh sách tất cả các dm đã bị xóa mềm
     Route::get('deleted', [CommentController::class, 'deleted']);
-    // chi tiết 1 sp
+    // chi tiết 1 dm
     Route::get('detail/{id}', [CommentController::class, 'detail']);
-    // backup 1 sp đã bị xóa mềm
+    // backup 1 dm đã bị xóa mềm
     Route::options('backup-one/{id}',[CommentController::class,'backupOne']);
-    // backup tất cả các sp đã bị xóa mềm
+    // backup tất cả các dm đã bị xóa mềm
     Route::options('backup-all',[CommentController::class,'backupAll']);
 
 });

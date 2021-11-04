@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function add(CategoryFormRequest $request)
+    // thêm mới một danh mục: ok
+    public function add(Request $request)
     {
         $categories = new Category();
         $categories->fill($request->all());
@@ -19,8 +20,8 @@ class CategoryController extends Controller
         ]);
     }
 
-    // cập nhật 1 sp
-    public function update(CategoryFormRequest $request, $id)
+    // cập nhật 1 sp: ok
+    public function update(Request $request, $id)
     {
         $categories = Category::find($id);
         if ($categories) {
@@ -38,7 +39,7 @@ class CategoryController extends Controller
         }
     }
 
-    // xóa mềm 1 sp
+    // xóa mềm 1 sp: ok
     public function delete($id)
     {
         $categories = Category::find($id);
@@ -88,14 +89,12 @@ class CategoryController extends Controller
         ]);
     }
 
-    // danh sách các sp chưa bị xóa mềm
+    // danh sách các sp chưa bị xóa mềm: ok
     public function index()
     {
-
         $categories = Category::all();
-        // $categories->load('products');
-        $categories = Category::withTrashed()->get();
         if ($categories->all()) {
+            $categories->load('products');
             return response()->json([
                 'success' => true,
                 'data' => $categories
@@ -125,11 +124,12 @@ class CategoryController extends Controller
         }
     }
 
-    // chi tiết 1 sp
+    // chi tiết 1 sp: ok
     public function detail($id)
     {
         $categories = Category::withTrashed()->find($id);
         if ($categories) {
+            $categories->load('products');
             return response()->json([
                 'success' => true,
                 'data' => $categories
@@ -137,7 +137,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Sản phẩm chưa tồn tại'
+                'message' => 'Danh mục chưa tồn tại'
             ]);
         }
     }
@@ -155,7 +155,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Sản phẩm chưa tồn tại'
+                'message' => 'Danh mục chưa tồn tại'
             ]);
         }
     }
@@ -171,4 +171,21 @@ class CategoryController extends Controller
             'data' => $categories
         ]);
     }
+    // lấy tất cả các sp trong dm theo id
+    // public function listProduct($id)
+    // {
+    //     $categories=Category::find($id);
+    //     if ($categories) {
+    //         $listProducts=$categories->load('products')->products;
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => $listProducts
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Danh mục chưa tồn tại'
+    //         ]);
+    //     }
+    // }
 }
