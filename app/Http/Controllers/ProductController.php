@@ -34,7 +34,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sp ko tồn tại'
+                'message' => 'sản phẩm không tồn tại'
             ]);
         }
     }
@@ -52,7 +52,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sp ko tồn tại'
+                'message' => 'sản phẩm không tồn tại'
             ]);
         }
     }
@@ -70,7 +70,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sp ko tồn tại'
+                'message' => 'sản phẩm không tồn tại'
             ]);
         }
     }
@@ -93,6 +93,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all();
+        // $products->load('category');
         if ($products->all()) {
             return response()->json([
                 'success' => true,
@@ -101,7 +102,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có sp nào trong db'
+                'message' => 'Chưa có sản phẩm nào trong dữ liệu'
             ]);
         }
     }
@@ -118,7 +119,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có sp bị xóa trong db'
+                'message' => 'Chưa có sản phẩm bị xóa trong dữ liệu'
             ]);
         }
     }
@@ -135,7 +136,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sp chưa tồn tại'
+                'message' => 'Sản phẩm chưa tồn tại'
             ]);
         }
     }
@@ -153,7 +154,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sp chưa tồn tại'
+                'message' => 'Sản phẩm chưa tồn tại'
             ]);
         }
     }

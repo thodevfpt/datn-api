@@ -23,6 +23,7 @@ class CreateProductsTable extends Migration
             $table->integer('quantity')->default(0);
             $table->text('desc_short');
             $table->text('description');
+           
             $table->softDeletes();
             $table->timestamps();
         });
