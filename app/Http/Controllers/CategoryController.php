@@ -8,8 +8,43 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    // thêm mới một danh mục: ok
-    public function add(Request $request)
+
+    public function index(Request $request)
+    {
+        $keyword=$request->input('keyword');
+        $sort=$request->input('sort');
+        $sort_name=$request->input('sort_name');
+        $status=$request->input('status');
+        $query= new Category;
+         if($keyword){
+            $query=$query->where('name','like','%'.$keyword.'%');
+        }
+        if($sort){
+            $query=$query->orderBy('created_at',$sort);
+        }
+         if($sort_name){
+             $query=$query->orderBy('name',$sort_name);
+        }
+          if($status){
+             $query=$query->orderBy('status','=',$status);
+        }
+         $category=$query->get();
+        if ($query->all()) {
+            $query->load('products');
+            return response()->json([
+                'success' => true,
+                'data' => $category
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'chưa có danh mục nào trong dữ liệu'
+            ]);
+        }
+    }
+
+
+    public function stored(Request $request)
     {
         $categories = new Category();
         $categories->fill($request->all());
@@ -20,7 +55,6 @@ class CategoryController extends Controller
         ]);
     }
 
-    // cập nhật 1 sp: ok
     public function update(Request $request, $id)
     {
         $categories = Category::find($id);
@@ -39,7 +73,6 @@ class CategoryController extends Controller
         }
     }
 
-    // xóa mềm 1 sp: ok
     public function delete($id)
     {
         $categories = Category::find($id);
@@ -57,7 +90,25 @@ class CategoryController extends Controller
         }
     }
 
-    // xóa vĩnh viễn 1 sp
+    public function show($id)
+    {
+        $categories = Category::withTrashed()->find($id);
+        if ($categories) {
+            $categories->load('products');
+            return response()->json([
+                'success' => true,
+                'data' => $categories
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Danh mục chưa tồn tại'
+            ]);
+        }
+    }
+
+
+
     public function forceDelete($id)
     {
         $categories = Category::withTrashed()->find($id);
@@ -75,7 +126,7 @@ class CategoryController extends Controller
         }
     }
 
-    // xóa vĩnh viễn tất cả các sp đã bị xóa mềm
+
     public function forceDeleteAll()
     {
 
@@ -89,26 +140,9 @@ class CategoryController extends Controller
         ]);
     }
 
-    // danh sách các sp chưa bị xóa mềm: ok
-    public function index()
-    {
-        $categories = Category::all();
-        if ($categories->all()) {
-            $categories->load('products');
-            return response()->json([
-                'success' => true,
-                'data' => $categories
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'chưa có danh mục nào trong dữ liệu'
-            ]);
-        }
-    }
 
-    // danh sách các sp đã bị xóa mềm
-    public function deleted()
+
+    public function trashed()
     {
         $categories = Category::onlyTrashed()->get();
         if ($categories->all()) {
@@ -124,25 +158,7 @@ class CategoryController extends Controller
         }
     }
 
-    // chi tiết 1 sp: ok
-    public function detail($id)
-    {
-        $categories = Category::withTrashed()->find($id);
-        if ($categories) {
-            $categories->load('products');
-            return response()->json([
-                'success' => true,
-                'data' => $categories
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Danh mục chưa tồn tại'
-            ]);
-        }
-    }
 
-    // backup 1 sp đã xóa mềm
     public function backupOne($id)
     {
         $categories = Category::onlyTrashed()->find($id);
@@ -159,7 +175,7 @@ class CategoryController extends Controller
             ]);
         }
     }
-    // backup tất cả các sp đã xóa mềm
+
     public function backupAll()
     {
         $categories = Category::onlyTrashed()->get();

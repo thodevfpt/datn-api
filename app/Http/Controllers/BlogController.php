@@ -12,14 +12,16 @@ class BlogController extends Controller
      public function index(Request $request){
         $keyword=$request->input('keyword');
         $sort=$request->input('sort');
-        // $query=Blog::all();
+        $sort_name=$request->input('sort_name');
         $query= new Blog;
-        // $query=DB::table('blogs');
         if($keyword){
             $query=$query->where('title','like','%'.$keyword.'%');
         }
         if($sort){
             $query=$query->orderBy('created_at',$sort);
+        }
+         if($sort_name){
+             $query=$query->orderBy('title',$sort_name);
         }
         $blog=$query->get();
         if ($blog->all()) {

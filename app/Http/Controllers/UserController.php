@@ -13,12 +13,16 @@ class UserController extends Controller
     {
         $keyword=$request->input('keyword');
         $sort=$request->input('sort');
+        $sort_name=$request->input('sort_name');
         $query=new User;
         if($keyword){
             $query=$query->where('user_name','like','%'.$keyword.'%');
         }
         if($sort){
             $query=$query->orderBy('created_at',$sort);
+        }
+        if($sort_name){
+             $query=$query->orderBy('user_name',$sort_name);
         }
 
        $user=$query->get();

@@ -3,12 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CommentFormRequest;
+use App\Models\Category;
 use App\Models\Comment;
-
+use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function add(CommentFormRequest $request)
+    public function index(Request $request)
+    {
+        $keyword=$request->input('keyword');
+        $sort=$request->input('sort');
+        $pro_id=$request->input('pro_id');
+        $query= new Category();
+        if($keyword){
+            $query=$query->where('content','like','%'.$keyword.'%');
+        }
+        if($sort){
+            $query=$query->orderBy('created_at',$sort);
+        }
+         if($pro_id){
+             $query=$query->orderBy('pro_id',$pro_id);
+        }
+        $comment=$query->get();
+
+        if ($comment->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $comment
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'chưa có comment nào trong dữ liệu'
+            ]);
+        }
+    }
+
+    public function store(CommentFormRequest $request)
     {
         $comment = new Comment();
         $comment->fill($request->all());
@@ -19,7 +50,7 @@ class CommentController extends Controller
         ]);
     }
 
-    // cập nhật 1 sp
+
     public function update(CommentFormRequest $request, $id)
     {
         $comment = Comment::find($id);
@@ -38,7 +69,22 @@ class CommentController extends Controller
         }
     }
 
-    // xóa mềm 1 sp
+    public function show($id)
+    {
+        $comment = Comment::withTrashed()->find($id);
+        if ($comment) {
+            return response()->json([
+                'success' => true,
+                'data' => $comment
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Comment chưa tồn tại'
+            ]);
+        }
+    }
+
     public function delete($id)
     {
         $comment = Comment::find($id);
@@ -56,7 +102,7 @@ class CommentController extends Controller
         }
     }
 
-    // xóa vĩnh viễn 1 sp
+
     public function forceDelete($id)
     {
         $comment = Comment::withTrashed()->find($id);
@@ -74,7 +120,6 @@ class CommentController extends Controller
         }
     }
 
-    // xóa vĩnh viễn tất cả các sp đã bị xóa mềm
     public function forceDeleteAll()
     {
 
@@ -88,25 +133,8 @@ class CommentController extends Controller
         ]);
     }
 
-    // danh sách các sp chưa bị xóa mềm
-    public function index()
-    {
-        $comment = Comment::all();
-        if ($comment->all()) {
-            return response()->json([
-                'success' => true,
-                'data' => $comment
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'chưa có comment nào trong dữ liệu'
-            ]);
-        }
-    }
 
-    // danh sách các sp đã bị xóa mềm
-    public function deleted()
+    public function trashed()
     {
         $comment = Comment::onlyTrashed()->get();
         if ($comment->all()) {
@@ -122,24 +150,6 @@ class CommentController extends Controller
         }
     }
 
-    // chi tiết 1 sp
-    public function detail($id)
-    {
-        $comment = Comment::withTrashed()->find($id);
-        if ($comment) {
-            return response()->json([
-                'success' => true,
-                'data' => $comment
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Comment chưa tồn tại'
-            ]);
-        }
-    }
-
-    // backup 1 sp đã xóa mềm
     public function backupOne($id)
     {
         $comment = Comment::onlyTrashed()->find($id);
@@ -156,7 +166,7 @@ class CommentController extends Controller
             ]);
         }
     }
-    // backup tất cả các sp đã xóa mềm
+
     public function backupAll()
     {
         $comment = Comment::onlyTrashed()->get();
