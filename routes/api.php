@@ -10,7 +10,8 @@ use App\Http\Controllers\InfoUserController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
-
+use App\Http\Controllers\OrderController;
+use App\Models\Order;
 
 /*
 |--------------------------------------------------------------------------
@@ -166,5 +167,12 @@ Route::prefix('comments')->group(function () {
 
 });
 
-
+Route::prefix('order')->group(function(){
+    // thêm mới một order
+    Route::post('add',[OrderController::class,'add']);
+    // list order chưa bị xóa mềm
+    Route::get('all',[OrderController::class,'index']);
+    // chi tiết một đơn hàng
+    Route::get('{id}',[OrderController::class,'detail']);
+});
 
