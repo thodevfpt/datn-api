@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterControler;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
@@ -45,10 +46,9 @@ Route::prefix('product')->group(function () {
     // chi tiết 1 sp
     Route::get('detail/{id}', [ProductController::class, 'detail']);
     // backup 1 sp đã bị xóa mềm
-    Route::options('backup-one/{id}',[ProductController::class,'backupOne']);
+    Route::options('backup-one/{id}', [ProductController::class, 'backupOne']);
     // backup tất cả các sp đã bị xóa mềm
-    Route::options('backup-all',[ProductController::class,'backupAll']);
-
+    Route::options('backup-all', [ProductController::class, 'backupAll']);
 });
 
 Route::prefix('categories')->group(function () {
@@ -69,74 +69,75 @@ Route::prefix('categories')->group(function () {
     // chi tiết 1 dm: ok
     Route::get('detail/{id}', [CategoryController::class, 'detail']);
     // backup 1 dm đã bị xóa mềm
-    Route::options('backup-one/{id}',[CategoryController::class,'backupOne']);
+    Route::options('backup-one/{id}', [CategoryController::class, 'backupOne']);
     // backup tất cả các dm đã bị xóa mềm
-    Route::options('backup-all',[CategoryController::class,'backupAll']);
+    Route::options('backup-all', [CategoryController::class, 'backupAll']);
     // lấy tất cả sp trong dm theo id
     // Route::get('product/{id}',[CategoryController::class,'listProduct']);
 
 });
 
 Route::prefix('blog')->group(function () {
-    Route::get('',[BlogController::class,'index']);
-    Route::post('store',[BlogController::class,'store']);
-    Route::put('update/{id}',[BlogController::class,'update']);
+    Route::get('', [BlogController::class, 'index']);
+    Route::post('store', [BlogController::class, 'store']);
+    Route::put('update/{id}', [BlogController::class, 'update']);
     //xoa men
-    Route::delete('delete/{id}',[BlogController::class,'destroy']);
+    Route::delete('delete/{id}', [BlogController::class, 'destroy']);
     //list da bi xoa mem
-     Route::get('trashed',[BlogController::class,'trashed']);
+    Route::get('trashed', [BlogController::class, 'trashed']);
     //xoa vv 1
-    Route::delete('force-delete/{id}',[BlogController::class,'forceDelete']);
+    Route::delete('force-delete/{id}', [BlogController::class, 'forceDelete']);
     //xoa vv all
-    Route::delete('force-delete/all',[BlogController::class,'forceDeleteAll']);
+    Route::delete('force-delete/all', [BlogController::class, 'forceDeleteAll']);
     //restor 1
-    Route::options('backup-one/{id}',[BlogController::class,'backupOne']);
+    Route::options('backup-one/{id}', [BlogController::class, 'backupOne']);
     //restor all
-    Route::options('backup-one/all',[BlogController::class,'backupAll']);
-    Route::get('detail/{id}',[BlogController::class,'show']);
+    Route::options('backup-one/all', [BlogController::class, 'backupAll']);
+    Route::get('detail/{id}', [BlogController::class, 'show']);
 });
 Route::prefix('user')->group(function () {
-    Route::get('',[UserController::class,'index']);
-    Route::post('store',[UserController::class,'store']);
-    Route::put('update/{id}',[UserController::class,'update']);
+    Route::get('', [UserController::class, 'index']);
+    Route::post('store', [UserController::class, 'store']);
+    Route::put('update/{id}', [UserController::class, 'update']);
     //xoa men
-    Route::delete('delete/{id}',[UserController::class,'destroy']);
+    Route::delete('delete/{id}', [UserController::class, 'destroy']);
     //list da bi xoa mem
-     Route::get('trashed',[UserController::class,'trashed']);
+    Route::get('trashed', [UserController::class, 'trashed']);
     //xoa vv 1
-    Route::delete('force-delete/{id}',[UserController::class,'forceDelete']);
+    Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
     //xoa vv all
-    Route::delete('force-delete/all',[UserController::class,'forceDeleteAll']);
+    Route::delete('force-delete/all', [UserController::class, 'forceDeleteAll']);
     //restor 1
-    Route::options('backup-one/{id}',[UserController::class,'backupOne']);
+    Route::options('backup-one/{id}', [UserController::class, 'backupOne']);
     //restor all
-    Route::options('backup-one/all',[UserController::class,'backupAll']);
-    Route::get('{id}',[UserController::class,'show']);
+    Route::options('backup-one/all', [UserController::class, 'backupAll']);
+    Route::get('{id}', [UserController::class, 'show']);
 });
 Route::prefix('infouser')->group(function () {
-    Route::get('',[InfoUserController::class,'index']);
-    Route::post('store',[InfoUserController::class,'store']);
-    Route::put('update/{infor}',[InfoUserController::class,'update']);
+    Route::get('', [InfoUserController::class, 'index']);
+    Route::post('store', [InfoUserController::class, 'store']);
+    Route::put('update/{infor}', [InfoUserController::class, 'update']);
     //xoa men
-    Route::delete('delete/{id}',[InfoUserController::class,'destroy']);
+    Route::delete('delete/{id}', [InfoUserController::class, 'destroy']);
     //list da bi xoa mem
-    Route::get('trashed',[InfoUserController::class,'trashed']);
+    Route::get('trashed', [InfoUserController::class, 'trashed']);
     //xoa vv 1
-    Route::delete('force-delete/{id}',[InfoUserController::class,'forceDelete']);
+    Route::delete('force-delete/{id}', [InfoUserController::class, 'forceDelete']);
     //xoa vv all
-    Route::delete('force-delete/all',[InfoUserController::class,'forceDeleteAll']);
+    Route::delete('force-delete/all', [InfoUserController::class, 'forceDeleteAll']);
     //restor 1
-    Route::options('backup-one/{id}',[InfoUserController::class,'backupOne']);
+    Route::options('backup-one/{id}', [InfoUserController::class, 'backupOne']);
     //restor all
-    Route::options('backup-one/all',[InfoUserController::class,'backupAll']);
-    Route::get('{infor}',[InforUserController::class,'show']);
+    Route::options('backup-one/all', [InfoUserController::class, 'backupAll']);
+    Route::get('{infor}', [InforUserController::class, 'show']);
 });
 
-//// Register Login Logout
-Route::post('register',[RegisterControler::class,'store']);
-Route::post('login',[LoginController::class,'login']);
-Route::get('logout',[LoginController::class,'logout']);
-
+// check auth
+Route::prefix('auth')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+});
 
 
 
@@ -161,18 +162,16 @@ Route::prefix('comments')->group(function () {
     // chi tiết 1 dm
     Route::get('detail/{id}', [CommentController::class, 'detail']);
     // backup 1 dm đã bị xóa mềm
-    Route::options('backup-one/{id}',[CommentController::class,'backupOne']);
+    Route::options('backup-one/{id}', [CommentController::class, 'backupOne']);
     // backup tất cả các dm đã bị xóa mềm
-    Route::options('backup-all',[CommentController::class,'backupAll']);
-
+    Route::options('backup-all', [CommentController::class, 'backupAll']);
 });
 
-Route::prefix('order')->group(function(){
+Route::middleware('auth:sanctum')->prefix('order')->group(function () {
     // thêm mới một order
-    Route::post('add',[OrderController::class,'add']);
+    Route::post('add', [OrderController::class, 'add']);
     // list order chưa bị xóa mềm
-    Route::get('all',[OrderController::class,'index']);
+    Route::get('all', [OrderController::class, 'index']);
     // chi tiết một đơn hàng
-    Route::get('{id}',[OrderController::class,'detail']);
+    Route::get('{id}', [OrderController::class, 'detail']);
 });
-

@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
     // list order chưa bị xóa mềm
-    public function index()
+    public function index(Request $request)
     {
         $orders = Order::all();
         if ($orders->all()) {
