@@ -14,7 +14,6 @@ class InfoUser extends Model
     protected $primarykey='id';
     protected $fillable=[
         'user_id',
-        'pro_id',
         'phone',
         'address',
         'birthday',

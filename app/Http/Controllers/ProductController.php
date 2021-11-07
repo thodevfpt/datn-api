@@ -8,8 +8,51 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    // danh sách các sp chưa bị xóa mềm
+    public function index(Request $request)
+    {
+        $keyword=$request->input('keyword');
+        $sort=$request->input('sort');
+        $sort_name=$request->input('sort_name');
+        $sort_price=$request->input('sort_price');
+        $cate=$request->input('cate');
+        $quantity=$request->input('quantity');
+        $query= new Product();
+        // $products->load('category');
+        if($keyword){
+            $query=$query->where('name','like','%'.$keyword.'%');
+        }
+        if($sort){
+            $query=$query->orderBy('created_at',$sort);
+        }
+         if($sort_name){
+             $query=$query->orderBy('name',$sort_name);
+        }
+         if($sort_price){
+             $query=$query->orderBy('price',$sort_price);
+        }
+         if($cate){
+             $query=$query->where('cate_id','=',$cate);
+        }
+          if($quantity){
+             $query=$query->where('quantity','=',$quantity);
+        }
+        $product=$query->get();
+        if ($product->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chưa có sản phẩm nào trong dữ liệu'
+            ]);
+        }
+    }
+
     // thêm mới 1 sp
-    public function add(ProductFormRequest $request)
+    public function store(ProductFormRequest $request)
     {
         $product = new Product();
         $product->fill($request->all());
@@ -35,6 +78,22 @@ class ProductController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'sản phẩm không tồn tại'
+            ]);
+        }
+    }
+    // chi tiết 1 sp
+    public function show($id)
+    {
+        $product = Product::withTrashed()->find($id);
+        if ($product) {
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sản phẩm chưa tồn tại'
             ]);
         }
     }
@@ -89,26 +148,9 @@ class ProductController extends Controller
         ]);
     }
 
-    // danh sách các sp chưa bị xóa mềm
-    public function index()
-    {
-        $products = Product::all();
-        // $products->load('category');
-        if ($products->all()) {
-            return response()->json([
-                'success' => true,
-                'data' => $products
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Chưa có sản phẩm nào trong dữ liệu'
-            ]);
-        }
-    }
 
     // danh sách các sp đã bị xóa mềm
-    public function deleted()
+    public function trashed()
     {
         $products = Product::onlyTrashed()->get();
         if ($products->all()) {
@@ -124,22 +166,6 @@ class ProductController extends Controller
         }
     }
 
-    // chi tiết 1 sp
-    public function detail($id)
-    {
-        $product = Product::withTrashed()->find($id);
-        if ($product) {
-            return response()->json([
-                'success' => true,
-                'data' => $product
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sản phẩm chưa tồn tại'
-            ]);
-        }
-    }
 
     // backup 1 sp đã xóa mềm
     public function backupOne($id)

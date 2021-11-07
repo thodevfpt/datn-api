@@ -37,9 +37,9 @@ class ProductFormRequest extends FormRequest
                 'required',
                 Rule::in($arr_cate_id)
             ],
-           
+
             'image' => 'required|string',
-            'price' => 'required|numeric|min:5',
+            'price' => 'required|numeric|min:3',
             'sale' => 'numeric|between:0,100',
             'quantity' => 'numeric',
             'desc_short' => 'required',

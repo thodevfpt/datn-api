@@ -16,8 +16,6 @@ class CreateInfoUsersTable extends Migration
         Schema::create('info_users', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->integer('pro_id');
-
             $table->string('phone');
             $table->text('address');
             $table->date('birthday');
