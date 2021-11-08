@@ -34,7 +34,7 @@ class CommentController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có comment nào trong dữ liệu'
+                'message' => 'no data'
             ]);
         }
     }
@@ -64,7 +64,7 @@ class CommentController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'comment không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -80,7 +80,7 @@ class CommentController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Comment chưa tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -97,7 +97,7 @@ class CommentController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'comment không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -115,7 +115,7 @@ class CommentController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'comment không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -145,7 +145,7 @@ class CommentController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có comment bị xóa trong dữ liệu'
+                'message' => 'no data'
             ]);
         }
     }
@@ -162,7 +162,7 @@ class CommentController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Comment chưa tồn tại'
+                'message' => 'no data'
             ]);
         }
     }

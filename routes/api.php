@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterControler;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProductController;
@@ -12,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\SlideController;
 use App\Models\Order;
 
 /*
@@ -28,10 +27,6 @@ use App\Models\Order;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-//// Register Login Logout
-Route::post('register',[RegisterControler::class,'store']);
-Route::post('login',[LoginController::class,'login']);
-Route::get('logout',[LoginController::class,'logout']);
 
 Route::prefix('product')->group(function () {
     // danh sách tất cả các sp chưa bị xóa mềm
@@ -82,6 +77,12 @@ Route::prefix('category')->group(function () {
     // Route::get('product/{id}',[CategoryController::class,'listProduct']);
 
 });
+Route::prefix('slide')->group(function () {
+    Route::get('', [SlideController::class, 'index']);
+    Route::post('store', [SlideController::class, 'store']);
+    Route::put('update/{id}', [SlideController::class, 'update']);
+    Route::delete('delete/{id}', [SlideController::class, 'destroy']);
+});
 
 Route::prefix('blog')->group(function () {
     Route::get('', [BlogController::class, 'index']);
@@ -122,7 +123,7 @@ Route::prefix('user')->group(function () {
 Route::prefix('infouser')->group(function () {
     Route::get('',[InfoUserController::class,'index']);
     Route::post('store',[InfoUserController::class,'store']);
-    Route::put('update/{id}',[InfoUserController::class,'update'])
+    Route::put('update/{id}',[InfoUserController::class,'update']);
     Route::delete('delete/{id}', [InfoUserController::class, 'destroy']);
     //list da bi xoa mem
     Route::get('trashed', [InfoUserController::class, 'trashed']);
