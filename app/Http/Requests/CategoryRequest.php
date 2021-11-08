@@ -2,13 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Category;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+
 use Illuminate\Validation\Rule;
 
-class ProductFormRequest extends FormRequest
+
+class CategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,33 +28,20 @@ class ProductFormRequest extends FormRequest
      */
     public function rules()
     {
-        $cates=Category::all();
-        $arr_cate_id=[];
-        foreach($cates as $c){
-            $arr_cate_id[]=$c->id;
-        }
-        $rule=[
-            'cate_id' => [
-                'required',
-                Rule::in($arr_cate_id)
-            ],
 
-            'image' => 'required',
-            'price' => 'required|min:3',
-            'sale' => 'between:0,100',
-            'quantity' => 'required',
-            'desc_short' => 'required',
-            'description' => 'required'
+
+        $rule=[
+            'status' => 'numeric',
         ];
        if($this->id){
         $rule['name']=[
             'required',
-            Rule::unique('products')->ignore($this->id)
+            Rule::unique('categories')->ignore($this->id)
         ];
        }else{
         $rule['name']=[
             'required',
-            Rule::unique('products')
+            Rule::unique('categories')
         ];
        }
 
@@ -63,12 +51,10 @@ class ProductFormRequest extends FormRequest
     public function messages()
     {
         return [
-            'image',
-            'price',
-            'sale',
-            'quantity',
-            'desc_short',
-            'description',
+
+            'name.required'=>'Hãy nhập tên danh mục',
+            'name.unique'=>'Tên danh mục đã tồn tại xin mời nhập tên khác.',
+            'status.numeric'=>'Hãy chọn trạng thái hi'
         ];
     }
     protected function failedValidation(Validator $validator)
@@ -80,4 +66,5 @@ class ProductFormRequest extends FormRequest
         ], 422);
         throw new HttpResponseException($response);
     }
+
 }

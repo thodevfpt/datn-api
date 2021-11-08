@@ -12,6 +12,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SlideController;
 use App\Models\Order;
+use App\Models\Slide;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,8 +74,8 @@ Route::prefix('category')->group(function () {
     Route::options('backup-all',[CategoryController::class,'backupAll']);
      // chi tiết 1 dm: ok
     Route::get('detail/{id}', [CategoryController::class, 'show']);
-    // lấy tất cả sp trong dm theo id
-    // Route::get('product/{id}',[CategoryController::class,'listProduct']);
+    Route::get('product/{cate_id}',[CategoryController::class,'list_pro']);
+
 
 });
 Route::prefix('slide')->group(function () {
@@ -82,6 +83,7 @@ Route::prefix('slide')->group(function () {
     Route::post('store', [SlideController::class, 'store']);
     Route::put('update/{id}', [SlideController::class, 'update']);
     Route::delete('delete/{id}', [SlideController::class, 'destroy']);
+    Route::get('detail/{id}', [SlideController::class,'show']);
 });
 
 Route::prefix('blog')->group(function () {
@@ -90,12 +92,12 @@ Route::prefix('blog')->group(function () {
     Route::put('update/{id}', [BlogController::class, 'update']);
     //xoa men
     Route::delete('delete/{id}', [BlogController::class, 'destroy']);
-    //list da bi xoa mem
-    Route::get('trashed', [BlogController::class, 'trashed']);
     //xoa vv 1
     Route::delete('force-delete/{id}', [BlogController::class, 'forceDelete']);
     //xoa vv all
-    Route::delete('force-delete/all', [BlogController::class, 'forceDeleteAll']);
+    Route::options('force-delete/all', [BlogController::class, 'forceDeleteAll']);
+      //list da bi xoa mem
+    Route::get('trashed', [BlogController::class, 'trashed']);
     //restor 1
     Route::options('backup-one/{id}', [BlogController::class, 'backupOne']);
     //restor all
@@ -130,7 +132,7 @@ Route::prefix('infouser')->group(function () {
     //xoa vv 1
     Route::delete('force-delete/{id}', [InfoUserController::class, 'forceDelete']);
     //xoa vv all
-    Route::delete('force-delete/all',[InfoUserController::class,'forceDeleteAll']);
+    Route::options('force-delete/all',[InfoUserController::class,'forceDeleteAll']);
    //restor 1
     Route::options('backup-one/{id}',[InfoUserController::class,'backupOne']);
     //restor all

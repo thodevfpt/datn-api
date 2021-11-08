@@ -14,16 +14,17 @@ class SlideController extends Controller
         $sort_name=$request->input('sort_name');
         $query= new Slide;
         if($keyword){
-            $query=$query->where('title','like','%'.$keyword.'%');
+            $query=$query->where('name','like','%'.$keyword.'%');
         }
         if($sort){
             $query=$query->orderBy('created_at',$sort);
         }
          if($sort_name){
-             $query=$query->orderBy('title',$sort_name);
+             $query=$query->orderBy('name',$sort_name);
         }
         $slide=$query->get();
         if ($slide->all()) {
+
             return response()->json([
                 'success' => true,
                 'data' => $slide
@@ -73,10 +74,15 @@ class SlideController extends Controller
     //xoa mem
     public function destroy($id){
         $slide=Slide::find($id);
-        $slide->delete();
-        return response()->json([
-                'success' => true,
-                'data' => $slide
-            ]);
+        if($slide){
+            $slide->delete();
+            return response()->json([
+                    'success' => true,
+                    'data' => $slide
+                ]);
+        }return response()->json([
+            'success'=>false,
+            'data'=>'no data'
+        ]);
     }
 }

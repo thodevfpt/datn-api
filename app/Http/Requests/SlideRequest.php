@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Requests;
+
+use App\Models\Category;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -25,19 +27,28 @@ class SlideRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-           'title'=>'required|min:3|',
+        $cates=Category::all();
+        $arr_cate_id=[];
+        foreach($cates as $c){
+            $arr_cate_id[]=$c->id;
+        }
+        $rule=[
+            'cate_id' => [
+                'required',
+                Rule::in($arr_cate_id)
+            ],
+           'name'=>'required|min:3|',
            "image"=>'required',
         ];
         if($this->id){
-        $rule['title']=[
+        $rule['name']=[
 
-            Rule::unique('slide')->ignore($this->id)
+            Rule::unique('slides')->ignore($this->id)
         ];
        }else{
-        $rule['title']=[
+        $rule['name']=[
 
-            Rule::unique('slide')
+            Rule::unique('slides')
         ];
        }
         return $rule;
@@ -45,7 +56,7 @@ class SlideRequest extends FormRequest
       public function messages()
     {
         return[
-            'title',
+            'name',
             'image',
         ];
     }

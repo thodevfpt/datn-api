@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProductFormRequest;
+use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -52,7 +52,7 @@ class ProductController extends Controller
     }
 
     // thêm mới 1 sp
-    public function store(ProductFormRequest $request)
+    public function store(ProductRequest $request)
     {
         $product = new Product();
         $product->fill($request->all());
