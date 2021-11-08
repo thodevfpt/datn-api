@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CommentFormRequest;
+use App\Http\Requests\CommentRequest;
 use App\Models\Category;
 use App\Models\Comment;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class CommentController extends Controller
         }
     }
 
-    public function store(CommentFormRequest $request)
+    public function store(CommentRequest $request)
     {
         $comment = new Comment();
         $comment->fill($request->all());
@@ -51,7 +51,7 @@ class CommentController extends Controller
     }
 
 
-    public function update(CommentFormRequest $request, $id)
+    public function update(CommentRequest $request, $id)
     {
         $comment = Comment::find($id);
         if ($comment) {

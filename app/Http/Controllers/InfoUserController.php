@@ -74,11 +74,17 @@ class InfoUserController extends Controller
      //xoa mem
     public function destroy($id){
         $info=InfoUser::find($id);
-        $info->delete();
-        return response()->json([
+        if($info){
+             $info->delete();
+             return response()->json([
                 'success' => true,
                 'data' => $info
             ]);
+        }  return response()->json([
+                'success' => false,
+                'data' => 'no data'
+            ]);
+
     }
     //xoa vv 1
     public function forceDelete($id){

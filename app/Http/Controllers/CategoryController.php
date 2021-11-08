@@ -1,8 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Http\Requests\CategoryFormRequest;
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -42,9 +41,19 @@ class CategoryController extends Controller
             ]);
         }
     }
+    //list_pro
+    public function list_pro($cate_id)
+    {
+        $category=Category::query()->find($cate_id);
+       $category->load('products');
+       return response()->json([
+           'success'=>true,
+           'data'=>$category->products,
+       ]);
+    }
 
 
-    public function stored(Request $request)
+    public function store(CategoryRequest $request)
     {
         $categories = new Category();
         $categories->fill($request->all());
@@ -106,9 +115,7 @@ class CategoryController extends Controller
             ]);
         }
     }
-
-
-
+//xoas vv 1
     public function forceDelete($id)
     {
         $categories = Category::withTrashed()->find($id);
@@ -126,7 +133,7 @@ class CategoryController extends Controller
         }
     }
 
-
+// xoa vv all
     public function forceDeleteAll()
     {
 
@@ -187,21 +194,5 @@ class CategoryController extends Controller
             'data' => $categories
         ]);
     }
-    // lấy tất cả các sp trong dm theo id
-    // public function listProduct($id)
-    // {
-    //     $categories=Category::find($id);
-    //     if ($categories) {
-    //         $listProducts=$categories->load('products')->products;
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $listProducts
-    //         ]);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Danh mục chưa tồn tại'
-    //         ]);
-    //     }
-    // }
+
 }
