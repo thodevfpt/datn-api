@@ -38,7 +38,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có danh mục nào trong dữ liệu'
+                'message' => 'no data'
             ]);
         }
     }
@@ -68,7 +68,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'danh mục không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -85,7 +85,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'danh mục không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -102,7 +102,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Danh mục chưa tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -121,7 +121,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'danh mục không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
@@ -153,7 +153,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có danh mục bị xóa trong dữ liệu'
+                'message' => 'no data'
             ]);
         }
     }
@@ -171,7 +171,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Danh mục chưa tồn tại'
+                'message' => 'no data'
             ]);
         }
     }

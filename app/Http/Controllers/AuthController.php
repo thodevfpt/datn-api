@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // register 
+    // register
     public function register(Request $request)
     {
         // chưa làm validate
@@ -23,7 +23,7 @@ class AuthController extends Controller
 
     // login
     public function login(Request $request)
-    {   
+    {
         // chưa làm validate
         $email = $request->email;
         $password = $request->password;
