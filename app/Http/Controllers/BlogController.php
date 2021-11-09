@@ -1,25 +1,26 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Http\Requests\BlogRequest;
 use App\Models\Blog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+
 
 class BlogController extends Controller
 {
      public function index(Request $request){
         $keyword=$request->input('keyword');
         $sort=$request->input('sort');
-        // $query=Blog::all();
+        $sort_name=$request->input('sort_name');
         $query= new Blog;
-        // $query=DB::table('blogs');
         if($keyword){
             $query=$query->where('title','like','%'.$keyword.'%');
         }
         if($sort){
             $query=$query->orderBy('created_at',$sort);
+        }
+         if($sort_name){
+             $query=$query->orderBy('title',$sort_name);
         }
         $blog=$query->get();
         if ($blog->all()) {
@@ -30,7 +31,7 @@ class BlogController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có sp nào trong db'
+                'message' => 'no data'
             ]);
         }
 
@@ -72,11 +73,18 @@ class BlogController extends Controller
     //xoa mem
     public function destroy($id){
         $blog=Blog::find($id);
-        $blog->delete();
-        return response()->json([
+
+        if($blog){
+            $blog->delete();
+            return response()->json([
                 'success' => true,
                 'data' => $blog
             ]);
+        } return response()->json([
+                'success' => false,
+                'data' => 'no data'
+            ]);
+
     }
     //xoa vv 1
     public function forceDelete($id){
@@ -133,8 +141,8 @@ class BlogController extends Controller
     //restore all
     public function backupAll(){
          $blog=Blog::onlyTrashed()->get();
-        foreach($blog as $blog){
-            $blog->forceDelete();
+        foreach($blog as $bl){
+            $bl->restore();
         }
          return response()->json([
                 'success' => true,

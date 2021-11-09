@@ -1,15 +1,59 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Http\Requests\CategoryFormRequest;
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    // thêm mới một danh mục: ok
-    public function add(Request $request)
+
+    public function index(Request $request)
+    {
+        $keyword=$request->input('keyword');
+        $sort=$request->input('sort');
+        $sort_name=$request->input('sort_name');
+        $status=$request->input('status');
+        $query= new Category;
+         if($keyword){
+            $query=$query->where('name','like','%'.$keyword.'%');
+        }
+        if($sort){
+            $query=$query->orderBy('created_at',$sort);
+        }
+         if($sort_name){
+             $query=$query->orderBy('name',$sort_name);
+        }
+          if($status){
+             $query=$query->where('status','=',$status);
+        }
+         $category=$query->get();
+        if ($category->all()) {
+            $category->load('products');
+            return response()->json([
+                'success' => true,
+                'data' => $category
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'no data'
+            ]);
+        }
+    }
+    //list_pro
+    public function list_pro($cate_id)
+    {
+        $category=Category::query()->find($cate_id);
+       $category->load('products');
+       return response()->json([
+           'success'=>true,
+           'data'=>$category->products,
+       ]);
+    }
+
+
+    public function store(CategoryRequest $request)
     {
         $categories = new Category();
         $categories->fill($request->all());
@@ -20,7 +64,6 @@ class CategoryController extends Controller
         ]);
     }
 
-    // cập nhật 1 sp: ok
     public function update(Request $request, $id)
     {
         $categories = Category::find($id);
@@ -34,12 +77,11 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'danh mục không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
 
-    // xóa mềm 1 sp: ok
     public function delete($id)
     {
         $categories = Category::find($id);
@@ -52,12 +94,28 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'danh mục không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
 
-    // xóa vĩnh viễn 1 sp
+    public function show($id)
+    {
+        $categories = Category::withTrashed()->find($id);
+        if ($categories) {
+            $categories->load('products');
+            return response()->json([
+                'success' => true,
+                'data' => $categories
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'no data'
+            ]);
+        }
+    }
+//xoas vv 1
     public function forceDelete($id)
     {
         $categories = Category::withTrashed()->find($id);
@@ -70,12 +128,12 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'danh mục không tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
 
-    // xóa vĩnh viễn tất cả các sp đã bị xóa mềm
+// xoa vv all
     public function forceDeleteAll()
     {
 
@@ -89,26 +147,9 @@ class CategoryController extends Controller
         ]);
     }
 
-    // danh sách các sp chưa bị xóa mềm: ok
-    public function index()
-    {
-        $categories = Category::all();
-        if ($categories->all()) {
-            $categories->load('products');
-            return response()->json([
-                'success' => true,
-                'data' => $categories
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'chưa có danh mục nào trong dữ liệu'
-            ]);
-        }
-    }
 
-    // danh sách các sp đã bị xóa mềm
-    public function deleted()
+
+    public function trashed()
     {
         $categories = Category::onlyTrashed()->get();
         if ($categories->all()) {
@@ -119,30 +160,12 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có danh mục bị xóa trong dữ liệu'
+                'message' => 'no data'
             ]);
         }
     }
 
-    // chi tiết 1 sp: ok
-    public function detail($id)
-    {
-        $categories = Category::withTrashed()->find($id);
-        if ($categories) {
-            $categories->load('products');
-            return response()->json([
-                'success' => true,
-                'data' => $categories
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Danh mục chưa tồn tại'
-            ]);
-        }
-    }
 
-    // backup 1 sp đã xóa mềm
     public function backupOne($id)
     {
         $categories = Category::onlyTrashed()->find($id);
@@ -155,11 +178,11 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Danh mục chưa tồn tại'
+                'message' => 'no data'
             ]);
         }
     }
-    // backup tất cả các sp đã xóa mềm
+
     public function backupAll()
     {
         $categories = Category::onlyTrashed()->get();
@@ -171,21 +194,5 @@ class CategoryController extends Controller
             'data' => $categories
         ]);
     }
-    // lấy tất cả các sp trong dm theo id
-    // public function listProduct($id)
-    // {
-    //     $categories=Category::find($id);
-    //     if ($categories) {
-    //         $listProducts=$categories->load('products')->products;
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $listProducts
-    //         ]);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Danh mục chưa tồn tại'
-    //         ]);
-    //     }
-    // }
+
 }

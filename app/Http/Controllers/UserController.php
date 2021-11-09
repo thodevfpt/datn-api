@@ -39,7 +39,6 @@ class UserController extends Controller
             // cập nhật cũ nhất
             $query = $query->orderBy('created_at');
         }
-
         $user = $query->get();
         if ($user->all()) {
             $user->load('info_user');

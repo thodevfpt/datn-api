@@ -10,7 +10,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
 
-class CommentFormRequest extends FormRequest
+class CommentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -50,13 +50,13 @@ class CommentFormRequest extends FormRequest
                 'required',
                 Rule::in($arr_user_id)
             ],
-           
+
             'content' => 'required|string|min:5',
             'vote' => 'numeric|between:1,5',
             'status' => 'numeric',
-           
+
         ];
-    
+
         return $rule;
     }
     public function messages()
@@ -70,7 +70,7 @@ class CommentFormRequest extends FormRequest
             'vote.between'=>'Đánh giá sản phẩm từ 1-5 ',
             'vote.numeric'=>'Đánh giá sản phẩm không được chứa kí tự',
             'status.numeric'=>'Trạng thái phải là số ',
-           
+
         ];
     }
     protected function failedValidation(Validator $validator)

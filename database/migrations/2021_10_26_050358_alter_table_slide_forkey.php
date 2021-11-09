@@ -14,8 +14,8 @@ class AlterTableSlideForkey extends Migration
     public function up()
     {
         Schema::table('slides', function (Blueprint $table) {
-            $table->foreignId('pro_id')->change()
-            ->constrained('products')
+            $table->foreignId('cate_id')->change()
+            ->constrained('categories')
             ->onUpdate('cascade')
             ->onDelete('cascade');
         });
@@ -29,7 +29,7 @@ class AlterTableSlideForkey extends Migration
     public function down()
     {
         Schema::table('slides', function (Blueprint $table) {
-            $table->dropForeign(['pro_id']);
+            $table->dropForeign(['cate_id']);
         });
     }
 }
