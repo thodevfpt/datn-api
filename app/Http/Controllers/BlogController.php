@@ -31,7 +31,7 @@ class BlogController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có sp nào trong db'
+                'message' => 'no data'
             ]);
         }
 
@@ -73,11 +73,18 @@ class BlogController extends Controller
     //xoa mem
     public function destroy($id){
         $blog=Blog::find($id);
-        $blog->delete();
-        return response()->json([
+
+        if($blog){
+            $blog->delete();
+            return response()->json([
                 'success' => true,
                 'data' => $blog
             ]);
+        } return response()->json([
+                'success' => false,
+                'data' => 'no data'
+            ]);
+
     }
     //xoa vv 1
     public function forceDelete($id){
@@ -134,8 +141,8 @@ class BlogController extends Controller
     //restore all
     public function backupAll(){
          $blog=Blog::onlyTrashed()->get();
-        foreach($blog as $blog){
-            $blog->forceDelete();
+        foreach($blog as $bl){
+            $bl->restore();
         }
          return response()->json([
                 'success' => true,

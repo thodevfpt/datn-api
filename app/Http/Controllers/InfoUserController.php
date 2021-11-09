@@ -140,8 +140,8 @@ class InfoUserController extends Controller
     //restore all
     public function backupAll(){
          $info=InfoUser::onlyTrashed()->get();
-        foreach($info as $info){
-            $info->forceDelete();
+        foreach($info as $if){
+            $if->forceDelete();
         }
          return response()->json([
                 'success' => true,

@@ -32,7 +32,7 @@ class SlideController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'chưa có sp nào trong db'
+                'message' => 'no data'
             ]);
         }
 
