@@ -25,7 +25,7 @@ class CategoryController extends Controller
              $query=$query->orderBy('name',$sort_name);
         }
           if($status){
-             $query=$query->orderBy('status','=',$status);
+             $query=$query->where('status','=',$status);
         }
          $category=$query->get();
         if ($category->all()) {
