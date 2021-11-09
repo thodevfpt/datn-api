@@ -29,7 +29,7 @@ class AlterTableSlideForkey extends Migration
     public function down()
     {
         Schema::table('slides', function (Blueprint $table) {
-            $table->dropForeign(['pro_id']);
+            $table->dropForeign(['cate_id']);
         });
     }
 }
