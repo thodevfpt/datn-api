@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Requests;
+
+use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -25,34 +27,28 @@ class infoUserRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'user_id'=>'required',
-            'pro_id'=>'required',
-            'phone'=>'required',
-            'address'=>'required|min:5',
-            'birthday'=>'required|date',
-            'gender'=>'required',
+        $rule=[
+            'user_id'=>[
+                'required',
+                'exists:users,id'
+            ],
+            'phone'=>'required|numeric',
+            'address'=>'required',
+            'birthday'=>'required|date_format:Y-m-d',
+            'gender'=>[
+                'required',
+                Rule::in([0,1,2])
+            ],
+            'image'=>'required|max:255',
         ];
-    }
-    public function messages()
-    {
-        return[
-            'user_id',
-            'pro_id',
-            'phone',
-            'address',
-            'birthday',
-            'birthday',
-            'gender',
-
-        ];
+        return $rule;
     }
     public  function failedValidation(Validator $validator)
     {
         $errors = $validator->errors();
         $response = response()->json([
-            'message' => 'Invalid data send',
-            'details' => $errors->messages(),
+            'success' => 'Invalid data send',
+            'data' => $errors->messages(),
         ], 422);
         throw new HttpResponseException($response);
     }

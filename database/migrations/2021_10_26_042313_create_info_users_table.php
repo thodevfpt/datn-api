@@ -16,13 +16,11 @@ class CreateInfoUsersTable extends Migration
         Schema::create('info_users', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->integer('pro_id');
-
             $table->string('phone');
             $table->text('address');
             $table->date('birthday');
-            $table->integer('gender')->default(1);
-            $table->softDeletes();
+            $table->tinyInteger('gender')->default(1);
+            $table->string('image',255);
             $table->timestamps();
         });
     }

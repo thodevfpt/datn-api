@@ -9,137 +9,129 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    // list user chưa bị xóa mềm có bao gồm lọc
     public function index(Request $request)
     {
-        $keyword=$request->input('keyword');
-        $sort=$request->input('sort');
-        $query=new User;
-        if($keyword){
-            $query=$query->where('user_name','like','%'.$keyword.'%');
+        $name = $request->name;
+        $role = $request->role;
+        $email = $request->email;
+        $sort = $request->sort;
+        $query = new User;
+        if ($name) {
+            $query = $query->where('user_name', 'like', '%' . $name . '%');
         }
-        if($sort){
-            $query=$query->orderBy('created_at',$sort);
+        if ($role > 0) {
+            $query = $query->where('role', $role);
+        }
+        if ($email) {
+            $query = $query->where('user_name', 'like', '%' . $email . '%');
+        }
+        if ($sort == 1) {
+            // tăng dần theo anpha
+            $query = $query->orderBy('user_name');
+        } elseif ($sort == 2) {
+            // giảm dần theo anpha
+            $query = $query->orderByDesc('user_name');
+        } elseif ($sort == 3) {
+            // cập nhật mới nhất
+            $query = $query->orderByDesc('created_at');
+        } elseif ($sort == 4) {
+            // cập nhật cũ nhất
+            $query = $query->orderBy('created_at');
         }
 
-       $user=$query->get();
+        $user = $query->get();
         if ($user->all()) {
-                return response()->json([
-                    'success' => true,
-                    'data' => $user
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'chưa có sp nào trong db'
-                ]);
-            }
-
-    }
-    public function store(UserRequest $request){
-         $model = new User();
-         $model->fill($request->all());
-         $model->save();
-         return response()->json([
-         'success' => true,
-         'data' => $model
-         ]);
-    }
-     public function update(UserRequest $request,$id){
-         $user=User::query()->find($id);
-         if($user){
-             $user->fill($request->all());
-             $user->save();
-             return response()->json([
-                     'success'=>true,
-                     'data'=>$user
-                 ]);
-         }
-         return response()->json([
-                 'success'=>false,
-             ]);
-    }
-    public function show($id){
-         $user = User::query()->find($id);
-         if($user){
-             return response()->json([
+            $user->load('info_user');
+            return response()->json([
                 'success' => true,
                 'data' => $user
             ]);
-         }return response()->json([
-              'success'=>false,
-         ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'data' => 'không có sp phù hợp trong db'
+            ]);
+        }
     }
-     //xoa mem
-    public function destroy($id){
-        $user=User::find($id);
-        $user->delete();
+   
+    //xoa mem 1 user
+    public function delete($id)
+    {
+        $user = User::find($id);
+        if ($user) {
+            $user->delete();
+            return response()->json([
+                'success' => true,
+                'data' => $user
+            ]);
+        }
         return response()->json([
-                'success' => true,
-                'data' => $user
-            ]);
+            'success' => false,
+            'data' => 'User không tồn tại'
+        ]);
     }
-    //xoa vv 1
-    public function forceDelete($id){
-        $user=User::withTrashed()->find($id);
-        if($user){
+    //xoa vĩnh viễn 1 user
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->find($id);
+        if ($user) {
             $user->forceDelete();
             return response()->json([
                 'success' => true,
                 'data' => $user
             ]);
-        }return response()->json([
-              'success'=>false,
-         ]);
-    }
-    //xoa vv all
-    public function forceDeleteAll(){
-        $user=User::onlyTrashed()->get();
-        foreach($user as $user){
-            $user->forceDelete();
         }
-         return response()->json([
-                'success' => true,
-                'data' => $user
-            ]);
+        return response()->json([
+            'success' => false,
+            'data' => 'user không tồn tại'
+        ]);
     }
-    //list da bi xoa mem
-    public function trashed(){
-        $user=User::onlyTrashed()->get();
-         if($user->all()){
-           return response()->json([
+
+    //list user đã xóa mềm
+    public function trashed()
+    {
+        $user = User::onlyTrashed()->get();
+        if ($user->all()) {
+            return response()->json([
                 'success' => true,
                 'data' => $user
             ]);
-        }return response()->json([
-             'success' => false,
-             'data' => 'no data'
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'user không tồn tại'
 
         ]);
     }
-    //restore 1
-    public function backupOne($id){
-         $user=User::onlyTrashed()->find($id);
-         if($user){
-             $user->restore();
-             return response()->json([
+
+    //restore 1 user
+    public function backupOne($id)
+    {
+        $user = User::onlyTrashed()->find($id);
+        if ($user) {
+            $user->restore();
+            return response()->json([
                 'success' => true,
                 'data' => $user
             ]);
-         }return response()->json([
-              'success'=>false,
-         ]);
-    }
-    //restore all
-    public function backupAll(){
-         $user=User::onlyTrashed()->get();
-        foreach($user as $user){
-            $user->forceDelete();
         }
-         return response()->json([
-                'success' => true,
-                'data' => $user
-            ]);
-
+        return response()->json([
+            'success' => false,
+            'data' => 'user không tồn tại'
+        ]);
     }
 
+    //restore all
+    public function backupAll()
+    {
+        $user = User::onlyTrashed()->get();
+        foreach ($user as $u) {
+            $u->restore();
+        }
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ]);
+    }
 }

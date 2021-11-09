@@ -20,13 +20,16 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $table='users';
-    protected $primarykey='id';
-    protected $fillable = [
+    public $fillable = [
         'user_name',
         'email',
         'password',
         'avatar'
     ];
+
+    public function info_user(){
+        return $this->hasMany(InfoUser::class,'user_id');
+     }
 
     /**
      * The attributes that should be hidden for serialization.
