@@ -28,8 +28,8 @@ class CategoryController extends Controller
              $query=$query->orderBy('status','=',$status);
         }
          $category=$query->get();
-        if ($query->all()) {
-            $query->load('products');
+        if ($category->all()) {
+            $category->load('products');
             return response()->json([
                 'success' => true,
                 'data' => $category
