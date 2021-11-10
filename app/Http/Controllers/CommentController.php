@@ -14,7 +14,7 @@ class CommentController extends Controller
         $keyword=$request->input('keyword');
         $sort=$request->input('sort');
         $pro_id=$request->input('pro_id');
-        $query= new Category();
+        $query= new Comment();
         if($keyword){
             $query=$query->where('content','like','%'.$keyword.'%');
         }
