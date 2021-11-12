@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -10,24 +11,24 @@ class CategoryController extends Controller
 
     public function index(Request $request)
     {
-        $keyword=$request->input('keyword');
-        $sort=$request->input('sort');
-        $sort_name=$request->input('sort_name');
-        $status=$request->input('status');
-        $query= new Category;
-         if($keyword){
-            $query=$query->where('name','like','%'.$keyword.'%');
+        $keyword = $request->input('keyword');
+        $sort = $request->input('sort');
+        $sort_name = $request->input('sort_name');
+        $status = $request->input('status');
+        $query = new Category;
+        if ($keyword) {
+            $query = $query->where('name', 'like', '%' . $keyword . '%');
         }
-        if($sort){
-            $query=$query->orderBy('created_at',$sort);
+        if ($sort) {
+            $query = $query->orderBy('created_at', $sort);
         }
-         if($sort_name){
-             $query=$query->orderBy('name',$sort_name);
+        if ($sort_name) {
+            $query = $query->orderBy('name', $sort_name);
         }
-          if($status){
-             $query=$query->where('status','=',$status);
+        if ($status) {
+            $query = $query->where('status', '=', $status);
         }
-         $category=$query->get();
+        $category = $query->get();
         if ($category->all()) {
             $category->load('products');
             return response()->json([
@@ -44,12 +45,12 @@ class CategoryController extends Controller
     //list_pro
     public function list_pro($cate_id)
     {
-        $category=Category::query()->find($cate_id);
-       $category->load('products');
-       return response()->json([
-           'success'=>true,
-           'data'=>$category->products,
-       ]);
+        $category = Category::query()->find($cate_id);
+        $category->load('products');
+        return response()->json([
+            'success' => true,
+            'data' => $category->products,
+        ]);
     }
 
 
@@ -115,7 +116,7 @@ class CategoryController extends Controller
             ]);
         }
     }
-//xoas vv 1
+    //xoas vv 1
     public function forceDelete($id)
     {
         $categories = Category::withTrashed()->find($id);
@@ -133,7 +134,7 @@ class CategoryController extends Controller
         }
     }
 
-// xoa vv all
+    // xoa vv all
     public function forceDeleteAll()
     {
 
@@ -194,5 +195,4 @@ class CategoryController extends Controller
             'data' => $categories
         ]);
     }
-
 }

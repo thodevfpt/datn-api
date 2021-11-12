@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // cấp quyền cao nhất cho Admin
+        Gate::before(function ($user, $ability) {
+            if ($user->hasRole('Admin')) {
+                return true;
+            }
+        });
         Schema::defaultStringLength(191);
     }
 }

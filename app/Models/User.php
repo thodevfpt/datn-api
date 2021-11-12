@@ -8,18 +8,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
     use SoftDeletes;
+    use HasRoles;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var string[]
      */
-    protected $table='users';
+    protected $table = 'users';
     public $fillable = [
         'user_name',
         'email',
@@ -27,9 +29,20 @@ class User extends Authenticatable
         'avatar'
     ];
 
-    public function info_user(){
-        return $this->hasMany(InfoUser::class,'user_id');
-     }
+    public function info_user()
+    {
+        return $this->hasMany(InfoUser::class, 'user_id');
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'carts', 'user_id', 'product_id')->withPivot('quantity');
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'user_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -49,8 +62,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-    public function setPasswordAttribute($value){
-    $hashed= bcrypt($value);
-    $this->attributes['password']=$hashed;
-        }
+    public function setPasswordAttribute($value)
+    {
+        $hashed = bcrypt($value);
+        $this->attributes['password'] = $hashed;
+    }
 }

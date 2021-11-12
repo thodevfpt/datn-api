@@ -76,6 +76,7 @@ class AuthController extends Controller
         //  check email
         $user = User::where('email', $email)->first();
         if ($user && Hash::check($password, $user->password)) {
+            $user->load(['info_user','roles','carts']);
             $token = $user->createToken('auth_login')->plainTextToken;
             return response()->json([
                 'success' => true,

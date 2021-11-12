@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -130,7 +131,34 @@ class UserController extends Controller
         }
         return response()->json([
             'success' => true,
-            'data' => $user
+            'data' => $user,
         ]);
+    }
+
+    // syncRoles
+    public function syncRoles(Request $request,$user_id)
+    {  
+        // chưa làm validate cho mảng roles
+        if(in_array('Admin',$request->roels) || $user_id==1){
+            return response()->json([
+                'success' => false,
+                'data' => [
+                    [
+                        'message'=>'bạn không được cấp quyền này'
+                    ]
+                ],
+            ]);
+        }
+       $user=User::find($user_id);
+       $user->syncRoles($request->roles);
+
+       return response()->json([
+        'success' => true,
+        'data' => [
+            [
+                'message'=>'cấp quyền thành công'
+            ]
+        ]
+    ]);
     }
 }

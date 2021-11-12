@@ -39,9 +39,15 @@ class Handler extends ExceptionHandler
             if ($request->is('api/*')) {
                 return response()->json([
                     'success'=>false,
-                    'message' => 'Not authenticated'
+                    'data' => 'Not authenticated'
                 ], 401);
             }
+        });
+        $this->renderable(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+            return response()->json([
+                'success'=>false,
+                'data' => 'You do not have the required authorization.'
+            ],403);
         });
     }
     
