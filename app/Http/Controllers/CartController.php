@@ -17,7 +17,7 @@ class CartController extends Controller
         foreach ($list_pro as $p) {
             $data[$p['id']] = ['quantity' => $p['quantity']];
         }
-        $user->prducts()->sync($data);
+        $user->products()->sync($data);
         return response()->json([
             'success' => true,
             'data' => [
