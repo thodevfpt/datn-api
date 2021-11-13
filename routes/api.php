@@ -55,63 +55,64 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
             Route::options('force-delete/all', [ProductController::class, 'forceDeleteAll']);
         });
 
-        Route::prefix('category')->group(function () {
-            // lấy danh sách dm
-            Route::get('', [CategoryController::class, 'index']);
-            // thêm mới dm
-            Route::post('store', [CategoryController::class, 'store']);
-            // cập nhật dm
-            Route::put('update/{id}', [CategoryController::class, 'update']);
-            // xóa mềm 1 dm
-            Route::delete('delete/{id}', [CategoryController::class, 'delete']);
-            // danh sách tất cả các dm đã bị xóa mềm
-            Route::get('trashed', [CategoryController::class, 'trashed']);
-            // backup 1 dm đã bị xóa mềm
-            Route::options('backup-one/{id}', [CategoryController::class, 'backupOne']);
-            // backup tất cả các dm đã bị xóa mềm
-            Route::options('backup-all', [CategoryController::class, 'backupAll']);
-            // chi tiết 1 dm: ok
-            Route::get('detail/{id}', [CategoryController::class, 'show']);
-            // list các sp trong dm
-            Route::get('product/{cate_id}', [CategoryController::class, 'list_pro']);
-            Route::middleware(['permission:delete category'])->group(function () {
-                // xóa vĩnh viễn
-                Route::delete('force-delete/{id}', [CategoryController::class, 'forceDelete']);
-                // xóa vĩnh viễn tất cả các dm đã bị xóa mềm
-                Route::options('force-delete/all', [CategoryController::class, 'forceDeleteAll']);
-            });
+
+    });
+    Route::prefix('category')->group(function () {
+        // lấy danh sách dm
+        Route::get('', [CategoryController::class, 'index']);
+        // thêm mới dm
+        Route::post('store', [CategoryController::class, 'store']);
+        // cập nhật dm
+        Route::put('update/{id}', [CategoryController::class, 'update']);
+        // xóa mềm 1 dm
+        Route::delete('delete/{id}', [CategoryController::class, 'delete']);
+        // danh sách tất cả các dm đã bị xóa mềm
+        Route::get('trashed', [CategoryController::class, 'trashed']);
+        // backup 1 dm đã bị xóa mềm
+        Route::options('backup-one/{id}', [CategoryController::class, 'backupOne']);
+        // backup tất cả các dm đã bị xóa mềm
+        Route::options('backup-all', [CategoryController::class, 'backupAll']);
+        // chi tiết 1 dm: ok
+        Route::get('detail/{id}', [CategoryController::class, 'show']);
+        // list các sp trong dm
+        Route::get('product/{cate_id}', [CategoryController::class, 'list_pro']);
+        Route::middleware(['permission:delete category'])->group(function () {
+            // xóa vĩnh viễn
+            Route::delete('force-delete/{id}', [CategoryController::class, 'forceDelete']);
+            // xóa vĩnh viễn tất cả các dm đã bị xóa mềm
+            Route::options('force-delete/all', [CategoryController::class, 'forceDeleteAll']);
         });
+    });
 
-        Route::prefix('slide')->group(function () {
-            Route::get('', [SlideController::class, 'index']);
-            Route::post('store', [SlideController::class, 'store']);
-            Route::put('update/{id}', [SlideController::class, 'update']);
-            Route::get('detail/{id}', [SlideController::class, 'show']);
-            Route::middleware(['permission:delete slide'])->group(function () {
-                Route::delete('delete/{id}', [SlideController::class, 'destroy']);
-            });
+    Route::prefix('slide')->group(function () {
+        Route::get('', [SlideController::class, 'index']);
+        Route::post('store', [SlideController::class, 'store']);
+        Route::put('update/{id}', [SlideController::class, 'update']);
+        Route::get('detail/{id}', [SlideController::class, 'show']);
+        Route::middleware(['permission:delete slide'])->group(function () {
+            Route::delete('delete/{id}', [SlideController::class, 'destroy']);
         });
+    });
 
-        Route::prefix('blog')->group(function () {
-            Route::get('', [BlogController::class, 'index']);
-            Route::post('store', [BlogController::class, 'store']);
-            Route::put('update/{id}', [BlogController::class, 'update']);
-            //xoa men
-            Route::delete('delete/{id}', [BlogController::class, 'destroy']);
+    Route::prefix('blog')->group(function () {
+        Route::get('', [BlogController::class, 'index']);
+        Route::post('store', [BlogController::class, 'store']);
+        Route::put('update/{id}', [BlogController::class, 'update']);
+        //xoa men
+        Route::delete('delete/{id}', [BlogController::class, 'destroy']);
 
-            //list da bi xoa mem
-            Route::get('trashed', [BlogController::class, 'trashed']);
-            //restor 1
-            Route::options('backup-one/{id}', [BlogController::class, 'backupOne']);
-            //restor all
-            Route::options('backup-all', [BlogController::class, 'backupAll']);
-            Route::get('detail/{id}', [BlogController::class, 'show']);
-            Route::middleware(['permission:delete blog'])->group(function () {
-                //xoa vv 1
-                Route::delete('force-delete/{id}', [BlogController::class, 'forceDelete']);
-                //xoa vv all
-                Route::options('force-delete/all', [BlogController::class, 'forceDeleteAll']);
-            });
+        //list da bi xoa mem
+        Route::get('trashed', [BlogController::class, 'trashed']);
+        //restor 1
+        Route::options('backup-one/{id}', [BlogController::class, 'backupOne']);
+        //restor all
+        Route::options('backup-all', [BlogController::class, 'backupAll']);
+        Route::get('detail/{id}', [BlogController::class, 'show']);
+        Route::middleware(['permission:delete blog'])->group(function () {
+            //xoa vv 1
+            Route::delete('force-delete/{id}', [BlogController::class, 'forceDelete']);
+            //xoa vv all
+            Route::options('force-delete/all', [BlogController::class, 'forceDeleteAll']);
         });
     });
 
