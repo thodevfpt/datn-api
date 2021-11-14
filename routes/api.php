@@ -54,8 +54,6 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
             // xóa vĩnh viễn tất cả các sp đã bị xóa mềm
             Route::options('force-delete/all', [ProductController::class, 'forceDeleteAll']);
         });
-
-
     });
     Route::prefix('category')->group(function () {
         // lấy danh sách dm
@@ -119,6 +117,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     Route::middleware(['role:Admin|manager user'])->prefix('user')->group(function () {
         // list user chưa bị xóa mềm có bao gồm lọc
         Route::post('all', [UserController::class, 'index']);
+        // get user chưa bị xóa mềm 
+        Route::get('{id}', [UserController::class, 'show']);
         //xoa mềm 1 user
         Route::delete('delete/{id}', [UserController::class, 'delete']);
         //list user đã xóa mềm
@@ -128,7 +128,7 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         //restor all user đã xóa mềm
         Route::options('backup-all', [UserController::class, 'backupAll']);
         // đồng bộ hóa role cho user
-        Route::post('syncRoles/{user_id}',[UserController::class,'syncRoles']);
+        Route::post('syncRoles/{user_id}', [UserController::class, 'syncRoles']);
         Route::middleware(['permission:delete user'])->group(function () {
             //xoa vĩnh viễn 1 user
             Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
@@ -180,6 +180,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
 Route::prefix('product')->group(function () {
     // chi tiết 1 sp
     Route::get('detail/{id}', [ProductController::class, 'show']);
+    // danh sách tất cả các sp chưa bị xóa mềm
+    Route::get('', [ProductController::class, 'index']);
 });
 
 Route::prefix('category')->group(function () {
@@ -227,8 +229,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // add cart
         Route::post('add-cart', [CartController::class, 'add']);
     });
-
 });
 // setup role và permission mặc định
-Route::get('setup_role_permission',[PermissionController::class,'run']);
-
+Route::get('setup_role_permission', [PermissionController::class, 'run']);
