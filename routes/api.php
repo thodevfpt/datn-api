@@ -13,6 +13,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SlideController;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,8 @@ use App\Http\Controllers\SlideController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+// test api
+Route::get('test',[TestController::class,'testTime']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
