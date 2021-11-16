@@ -19,11 +19,13 @@ class CreateVouchersTable extends Migration
             $table->string('title');
             $table->string('code',191);
             $table->tinyInteger('sale');
-            $table->string('user',255);
+            $table->string('customer_type ',255);
             $table->decimal('condition',10,0);
-            $table->date('expiration');
+            $table->tinyInteger('expiration');
             $table->tinyInteger('active')->default(0);
             $table->tinyInteger('times');
+            $table->date('start_day ');
+            $table->date('end_day ');
             $table->timestamps();
         });
     }
