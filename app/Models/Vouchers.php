@@ -15,7 +15,7 @@ class Vouchers extends Model
         'title',  
         'code',  
         'sale',  
-        'user',  
+        'customer_type',  
         'condition',  
         'expiration',  
         'active',  
