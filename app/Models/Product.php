@@ -24,5 +24,9 @@ class Product extends Model
     public function category(){
         return $this->belongsTo(Category::class,'cate_id');
      }
+     public function comments()
+    {
+        return $this->hasMany(Comment::class,'pro_id');
+    }
 
 }

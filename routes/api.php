@@ -13,6 +13,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SlideController;
+use App\Models\Product;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,10 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::options('backup-one/{id}', [ProductController::class, 'backupOne']);
         // backup tất cả các sp đã bị xóa mềm
         Route::options('backup-all', [ProductController::class, 'backupAll']);
+        // chi tiết 1 sp
+        Route::get('detail/{id}', [ProductController::class, 'show']);
+        //list comment thuộc sp
+        Route::get('comment/{pro_id}',[ProductController::class,'list_comments']);
         Route::middleware(['permission:delete product'])->group(function () {
             // xóa vĩnh viễn 1 sp
             Route::delete('force-delete/{id}', [ProductController::class, 'forceDelete']);
@@ -118,7 +123,7 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
 
     Route::middleware(['role:Admin|manager user'])->prefix('user')->group(function () {
         // list user chưa bị xóa mềm có bao gồm lọc
-        Route::post('all', [UserController::class, 'index']);
+        Route::get('', [UserController::class, 'index']);
         //xoa mềm 1 user
         Route::delete('delete/{id}', [UserController::class, 'delete']);
         //list user đã xóa mềm
@@ -178,6 +183,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
 
 // các API của UI User
 Route::prefix('product')->group(function () {
+    // danh sách tất cả các sp chưa bị xóa mềm
+    Route::get('', [ProductController::class, 'index']);
     // chi tiết 1 sp
     Route::get('detail/{id}', [ProductController::class, 'show']);
 });
