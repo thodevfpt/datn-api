@@ -34,8 +34,6 @@ class PermissionController extends Controller
         // create new user and give role
         $user1=User::find(1);
         $user1->assignRole($role1);
-        $user2=User::find(2);
-        $user2->assignRole($role2);
         
         dd('done');
 
