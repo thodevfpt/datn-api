@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InfoUserController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ClassifyVouchersController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
@@ -31,6 +32,13 @@ Route::get('test',[TestController::class,'testTime']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+// API setup data default
+
+// set data cho bảng classify_voucher
+Route::get('setup_classify_voucher', [ClassifyVouchersController::class, 'run']);
+// setup role và permission mặc định
+Route::get('setup_role_permission', [PermissionController::class, 'run']);
+
 // các API của admin
 Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user'])->prefix('admin')->group(function () {
     Route::get('', function () {
@@ -233,5 +241,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('add-cart', [CartController::class, 'add']);
     });
 });
-// setup role và permission mặc định
-Route::get('setup_role_permission', [PermissionController::class, 'run']);
+

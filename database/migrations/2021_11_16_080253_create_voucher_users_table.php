@@ -17,6 +17,7 @@ class CreateVoucherUsersTable extends Migration
             $table->id();
             $table->integer('voucher_id');
             $table->integer('user_id');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
