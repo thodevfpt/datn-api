@@ -51,6 +51,18 @@ class ProductController extends Controller
         }
     }
 
+    //list_comments
+    public function list_comments($pro_id){
+        $product=Product::query()->find($pro_id);
+        $product->load('comments');
+        return response()->json([
+            'success'=>true,
+            'data'=> $product->comments,
+
+        ]);
+
+    }
+
     // thêm mới 1 sp
     public function store(ProductRequest $request)
     {

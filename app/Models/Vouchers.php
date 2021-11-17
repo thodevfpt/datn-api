@@ -8,17 +8,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vouchers extends Model
 {
-    use HasFactory;use SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
     protected $table='vouchers';
     public $fillable=[
         'classify_voucher_id',
-        'title',  
-        'code',  
-        'sale',  
-        'customer_type',  
-        'condition',  
-        'expiration',  
-        'active',  
-        'times',  
+        'title',
+        'code',
+        'sale',
+        'customer_type',
+        'condition',
+        'expiration',
+        'active',
+        'planning',
+        'times',
+        'start_day',
+        'end_day'
     ];
 }
