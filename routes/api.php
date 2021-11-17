@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InfoUserController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ClassifyVouchersController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
@@ -29,6 +30,13 @@ use App\Models\Product;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+// API setup data default
+
+// set data cho bảng classify_voucher
+Route::get('setup_classify_voucher', [ClassifyVouchersController::class, 'run']);
+// setup role và permission mặc định
+Route::get('setup_role_permission', [PermissionController::class, 'run']);
+
 // các API của admin
 Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user'])->prefix('admin')->group(function () {
     Route::get('', function () {
@@ -59,8 +67,6 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
             // xóa vĩnh viễn tất cả các sp đã bị xóa mềm
             Route::options('force-delete/all', [ProductController::class, 'forceDeleteAll']);
         });
-
-
     });
     Route::prefix('category')->group(function () {
         // lấy danh sách dm
@@ -120,20 +126,22 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
             Route::options('force-delete/all', [BlogController::class, 'forceDeleteAll']);
         });
     });
-
+   
     Route::middleware(['role:Admin|manager user'])->prefix('user')->group(function () {
         // list user chưa bị xóa mềm có bao gồm lọc
         Route::get('', [UserController::class, 'index']);
         //xoa mềm 1 user
         Route::delete('delete/{id}', [UserController::class, 'delete']);
         //list user đã xóa mềm
-        Route::get('trashed', [UserController::class, 'trashed']);
+        Route::get('trashed/all', [UserController::class, 'trashed']);
+        // get user theo id
+        Route::get('{id}', [UserController::class, 'show']);
         //restor 1 user
         Route::options('backup-one/{id}', [UserController::class, 'backupOne']);
         //restor all user đã xóa mềm
         Route::options('backup-all', [UserController::class, 'backupAll']);
         // đồng bộ hóa role cho user
-        Route::post('syncRoles/{user_id}',[UserController::class,'syncRoles']);
+        Route::post('syncRoles/{user_id}', [UserController::class, 'syncRoles']);
         Route::middleware(['permission:delete user'])->group(function () {
             //xoa vĩnh viễn 1 user
             Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
@@ -187,6 +195,8 @@ Route::prefix('product')->group(function () {
     Route::get('', [ProductController::class, 'index']);
     // chi tiết 1 sp
     Route::get('detail/{id}', [ProductController::class, 'show']);
+    // danh sách tất cả các sp chưa bị xóa mềm
+    Route::get('', [ProductController::class, 'index']);
 });
 
 Route::prefix('category')->group(function () {
@@ -234,8 +244,5 @@ Route::middleware('auth:sanctum')->group(function () {
         // add cart
         Route::post('add-cart', [CartController::class, 'add']);
     });
-
 });
-// setup role và permission mặc định
-Route::get('setup_role_permission',[PermissionController::class,'run']);
 

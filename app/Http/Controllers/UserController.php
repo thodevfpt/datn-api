@@ -54,7 +54,21 @@ class UserController extends Controller
             ]);
         }
     }
-   
+    public function show($id)
+    {
+        $user = User::find($id);
+        if ($user) {
+            $user->load(['info_user','roles']);
+            return response()->json([
+                'success' => true,
+                'data' => $user
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'User không tồn tại'
+        ]);
+    }
     //xoa mem 1 user
     public function delete($id)
     {
@@ -136,29 +150,29 @@ class UserController extends Controller
     }
 
     // syncRoles
-    public function syncRoles(Request $request,$user_id)
-    {  
+    public function syncRoles(Request $request, $user_id)
+    {
         // chưa làm validate cho mảng roles
-        if(in_array('Admin',$request->roels) || $user_id==1){
+        if (in_array('Admin', $request->roles) || $user_id == 1) {
             return response()->json([
                 'success' => false,
                 'data' => [
                     [
-                        'message'=>'bạn không được cấp quyền này'
+                        'message' => 'bạn không được cấp quyền này'
                     ]
                 ],
             ]);
         }
-       $user=User::find($user_id);
-       $user->syncRoles($request->roles);
+        $user = User::find($user_id);
+        $user->syncRoles($request->roles);
 
-       return response()->json([
-        'success' => true,
-        'data' => [
-            [
-                'message'=>'cấp quyền thành công'
+        return response()->json([
+            'success' => true,
+            'data' => [
+                [
+                    'message' => 'cấp quyền thành công'
+                ]
             ]
-        ]
-    ]);
+        ]);
     }
 }
