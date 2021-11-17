@@ -15,7 +15,6 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\VouchersController;
-use App\Models\Product;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,7 +60,7 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         // chi tiết 1 sp
         Route::get('detail/{id}', [ProductController::class, 'show']);
         //list comment thuộc sp
-        Route::get('comment/{pro_id}',[ProductController::class,'list_comments']);
+        Route::get('comment/{pro_id}', [ProductController::class, 'list_comments']);
         Route::middleware(['permission:delete product'])->group(function () {
             // xóa vĩnh viễn 1 sp
             Route::delete('force-delete/{id}', [ProductController::class, 'forceDelete']);
@@ -126,8 +125,12 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
             Route::options('force-delete/all', [BlogController::class, 'forceDeleteAll']);
         });
     });
-//bảng voucher:
+    //bảng voucher:
     Route::prefix('voucher')->group(function () {
+        // lấy list classify_vouchers
+        Route::get('classify_vouchers/all', [VouchersController::class, 'list_Classify_vouchers']);
+        // active planning
+        Route::post('planning/{id}', [VouchersController::class, 'planning']);
         //danh sach voucher
         Route::get('', [VouchersController::class, 'index']);
         //them moi voucher
@@ -142,13 +145,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::delete('force-delete/{id}', [VouchersController::class, 'forceDelete']);
         //xoa vv all
         Route::options('force-delete/all', [VouchersController::class, 'forceDeleteAll']);
-        //khoi phuc 1 voucher
-        Route::options('backup-one/{id}', [VouchersController::class, 'backupOne']);
-        // khoi phuc  tất cả các voucher đã bị xóa mềm
-        Route::options('backup-all', [VouchersController::class, 'backupAll']);
         // chi tiết 1 voucher
         Route::get('detail/{id}', [VouchersController::class, 'show']);
-
     });
 
     Route::middleware(['role:Admin|manager user'])->prefix('user')->group(function () {
@@ -269,4 +267,3 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('add-cart', [CartController::class, 'add']);
     });
 });
-

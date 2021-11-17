@@ -10,8 +10,8 @@ class Vouchers extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $table='vouchers';
-    public $fillable=[
+    protected $table = 'vouchers';
+    public $fillable = [
         'classify_voucher_id',
         'title',
         'code',
@@ -19,10 +19,12 @@ class Vouchers extends Model
         'customer_type',
         'condition',
         'expiration',
-        'active',
-        'planning',
         'times',
         'start_day',
-        'end_day'
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'voucher_users', 'user_id', 'voucher_id');
+    }
 }
