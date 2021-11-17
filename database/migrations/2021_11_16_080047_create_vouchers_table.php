@@ -27,6 +27,7 @@ class CreateVouchersTable extends Migration
             $table->tinyInteger('times');
             $table->date('start_day');
             $table->date('end_day')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -14,6 +14,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SlideController;
+use App\Http\Controllers\VouchersController;
 use App\Models\Product;
 
 /*
@@ -111,7 +112,6 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('update/{id}', [BlogController::class, 'update']);
         //xoa men
         Route::delete('delete/{id}', [BlogController::class, 'destroy']);
-
         //list da bi xoa mem
         Route::get('trashed', [BlogController::class, 'trashed']);
         //restor 1
@@ -126,7 +126,31 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
             Route::options('force-delete/all', [BlogController::class, 'forceDeleteAll']);
         });
     });
-   
+//bảng voucher:
+    Route::prefix('voucher')->group(function () {
+        //danh sach voucher
+        Route::get('', [VouchersController::class, 'index']);
+        //them moi voucher
+        Route::post('store', [VouchersController::class, 'store']);
+        //sua  voucher
+        Route::put('update/{id}', [VouchersController::class, 'update']);
+        //xoa mem
+        Route::delete('delete/{id}', [VouchersController::class, 'destroy']);
+        //thung rac
+        Route::get('trashed', [VouchersController::class, 'trashed']);
+        // xóa vĩnh viễn
+        Route::delete('force-delete/{id}', [VouchersController::class, 'forceDelete']);
+        //xoa vv all
+        Route::options('force-delete/all', [VouchersController::class, 'forceDeleteAll']);
+        //khoi phuc 1 voucher
+        Route::options('backup-one/{id}', [VouchersController::class, 'backupOne']);
+        // khoi phuc  tất cả các voucher đã bị xóa mềm
+        Route::options('backup-all', [VouchersController::class, 'backupAll']);
+        // chi tiết 1 voucher
+        Route::get('detail/{id}', [VouchersController::class, 'show']);
+
+    });
+
     Route::middleware(['role:Admin|manager user'])->prefix('user')->group(function () {
         // list user chưa bị xóa mềm có bao gồm lọc
         Route::get('', [UserController::class, 'index']);
