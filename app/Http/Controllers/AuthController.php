@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Vouchers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -41,6 +42,12 @@ class AuthController extends Controller
         $user = new User();
         $user->fill($request->all());
         $user->save();
+        $vouchers=Vouchers::all();
+        $voucher_id=[];
+        foreach($vouchers as $v){
+            $voucher_id[]=$v->id;
+        }
+        $user->vouchers()->sync($voucher_id);
         return response()->json([
             'success' => true,
             'data' => 'Đăng ký thành công'
