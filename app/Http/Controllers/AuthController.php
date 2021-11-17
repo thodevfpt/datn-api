@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Vouchers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -41,6 +42,12 @@ class AuthController extends Controller
         $user = new User();
         $user->fill($request->all());
         $user->save();
+        $vouchers=Vouchers::all();
+        $voucher_id=[];
+        foreach($vouchers as $v){
+            $voucher_id[]=$v->id;
+        }
+        $user->vouchers()->sync($voucher_id);
         return response()->json([
             'success' => true,
             'data' => 'Đăng ký thành công'
@@ -76,7 +83,7 @@ class AuthController extends Controller
         //  check email
         $user = User::where('email', $email)->first();
         if ($user && Hash::check($password, $user->password)) {
-            $user->load(['info_user','roles','carts']);
+            $user->load(['info_user','roles','carts','vouchers']);
             $token = $user->createToken('auth_login')->plainTextToken;
             return response()->json([
                 'success' => true,

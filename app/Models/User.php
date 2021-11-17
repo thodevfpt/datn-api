@@ -44,6 +44,11 @@ class User extends Authenticatable
         return $this->hasMany(Cart::class, 'user_id');
     }
 
+    public function vouchers()
+    {
+        return $this->belongsToMany(Vouchers::class, 'voucher_users', 'user_id', 'voucher_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

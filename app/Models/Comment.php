@@ -15,9 +15,12 @@ class Comment extends Model
         'user_id',
         'content',
         'vote',
-        'status',  
+        'status',
     ];
 
+ public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
-    
 }
