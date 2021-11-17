@@ -251,19 +251,21 @@ Route::prefix('comment')->group(function () {
     Route::get('', [CommentController::class, 'index']);
     Route::post('store', [CommentController::class, 'store']);
 });
-Route::middleware('auth:sanctum')->group(function () {
 
-    Route::prefix('order')->group(function () {
-        // thêm mới một order
-        Route::post('add', [OrderController::class, 'add']);
-        // list order chưa bị xóa mềm
-        Route::get('all', [OrderController::class, 'index']);
-        // chi tiết một đơn hàng
-        Route::get('{id}', [OrderController::class, 'detail']);
-    });
+Route::prefix('order')->group(function () {
+    // thêm mới một order
+    Route::post('add', [OrderController::class, 'add']);
+    // list order chưa bị xóa mềm
+    Route::get('all', [OrderController::class, 'index']);
+    // chi tiết một đơn hàng
+    Route::get('{id}', [OrderController::class, 'detail']);
+});
 
-    Route::prefix('cart')->group(function () {
-        // add cart
-        Route::post('add-cart', [CartController::class, 'add']);
-    });
+Route::prefix('cart')->group(function () {
+    // add cart
+    Route::post('add-cart', [CartController::class, 'add']);
+});
+Route::prefix('voucher')->group(function () {
+    //danh sach voucher
+    Route::get('', [VouchersController::class, 'index']);
 });
