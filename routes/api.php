@@ -14,11 +14,8 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SlideController;
-<<<<<<< HEAD
 use App\Http\Controllers\TestController;
-=======
 use App\Http\Controllers\VouchersController;
->>>>>>> beadd1ca7bb4693ba25c86df6375926711a83cec
 
 /*
 |--------------------------------------------------------------------------
