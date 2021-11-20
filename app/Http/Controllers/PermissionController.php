@@ -23,19 +23,21 @@ class PermissionController extends Controller
         Permission::create(['name' => 'delete blog']);
         Permission::create(['name' => 'delete user']);
         Permission::create(['name' => 'delete comment']);
-        
+
         // create roles and assign existing permissions
         $role1 = Role::create(['name' => 'Admin']);
-        $role2 = Role::create(['name' => 'manager order']);
+        $role2 = Role::create(['name' => 'shipper']);
         $role3 = Role::create(['name' => 'manager content']);
         $role4 = Role::create(['name' => 'manager comment']);
         $role5 = Role::create(['name' => 'manager user']);
-      
-        // create new user and give role
-        $user1=User::find(1);
-        $user1->assignRole($role1);
-        
-        dd('done');
+        $role6 = Role::create(['name' => 'manager order']);
 
+        // create new user and give role
+        $user1 = User::find(1);
+        $user1->assignRole($role1);
+        $user2 = User::find(2);
+        $user2->assignRole($role2);
+
+        dd('done');
     }
 }
