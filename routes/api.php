@@ -205,8 +205,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     });
 
     Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
-        // thêm mới một order
-        Route::post('add', [OrderController::class, 'add']);
+        // list đơn hàng mới của shipper =>những đơn hàng chưa được shipper xác nhận
+        Route::get('shipper/{shipper_id}', [OrderController::class, 'shipper_order']);
         // list order chưa bị xóa mềm
         Route::get('all', [OrderController::class, 'index']);
         // chi tiết một đơn hàng
@@ -256,10 +256,12 @@ Route::prefix('comment')->group(function () {
 });
 
 Route::prefix('order')->group(function () {
-    // thêm mới một order
+    // list all order chưa bị xóa mềm
     Route::post('add', [OrderController::class, 'add']);
     // list order chưa bị xóa mềm
     Route::get('all', [OrderController::class, 'index']);
+    // list 1 order theo user_id
+
     // chi tiết một đơn hàng
     Route::get('{id}', [OrderController::class, 'detail']);
 });

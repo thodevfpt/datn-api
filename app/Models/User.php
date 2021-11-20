@@ -49,6 +49,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Vouchers::class, 'voucher_users', 'user_id', 'voucher_id');
     }
 
+    public function shipper_orders()
+    {
+        return $this->hasMany(Order::class, 'shipper_id');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
