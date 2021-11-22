@@ -15,7 +15,7 @@ class Order extends Model
         'user_id',
         'voucher_id',
         'shipper_id',
-        'order_process_id',
+        'process_id',
         'total_price',
         'customer_name',
         'customer_phone',
@@ -28,8 +28,33 @@ class Order extends Model
         'shop_note',
         'cancel_note',
     ];
+    // lấy chi tiết đơn hàng
     public function order_details()
     {
         return $this->hasMany(OrderDetail::class, 'order_id');
     }
+
+     // lấy thông tin khách hàng
+     public function customer()
+     {
+         return $this->belongsTo(User::class, 'user_id');
+     }
+
+      // lấy thông tin vouher
+    public function voucher()
+    {
+        return $this->belongsTo(Vouchers::class, 'voucher_id');
+    }
+
+     // lấy thông tin shipper
+     public function shipper()
+     {
+         return $this->belongsTo(User::class, 'shipper_id');
+     }
+
+       // lấy thông tin process
+       public function process()
+       {
+           return $this->belongsTo(OrderProcess::class, 'process_id');
+       }
 }

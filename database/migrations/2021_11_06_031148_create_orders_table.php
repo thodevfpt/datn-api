@@ -18,7 +18,7 @@ class CreateOrdersTable extends Migration
             $table->integer('user_id')->nullable();
             $table->integer('voucher_id')->nullable();
             $table->integer('shipper_id')->nullable();
-            $table->tinyInteger('order_process_id')->default(1);
+            $table->tinyInteger('process_id')->default(1);
             $table->string('code_orders');
             $table->decimal('total_price', 15, 0);
             $table->string('customer_name', 255);

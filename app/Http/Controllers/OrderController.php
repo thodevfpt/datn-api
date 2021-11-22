@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+
     // list order chưa bị xóa mềm
     public function index(Request $request)
     {
@@ -65,7 +66,7 @@ class OrderController extends Controller
     {
         $order = Order::find($id);
         if ($order) {
-            $order->load('order_details');
+            $order->load('order_details', 'customer', 'voucher', 'shipper', 'process');
             return response()->json([
                 'success' => true,
                 'data' => $order
@@ -76,13 +77,409 @@ class OrderController extends Controller
             'message' => 'đơn hàng không tồn tại'
         ]);
     }
-    public function shipper_order($shipper_id)
+
+    // lấy đơn hàng theo trạng thái xử lí
+    public function get_order_process($process_id)
     {
-        $model = User::find($shipper_id);
-        $listOrder = $model->shipper_orders()->where('shipper_confirm', '=', 0)->get();
+        $model = Order::where('process_id', $process_id)->get();
+        if ($model->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $model
+            ]);
+        }
         return response()->json([
-            'success' => true,
-            'data' => $listOrder
+            'success' => false,
+            'data' => 'no data'
         ]);
     }
+
+    // update đơn hàng => chưa xử lí theo id
+    public function updateNoProcessId($order_id)
+    {
+        // chưa validate
+        $model = Order::find($order_id);
+        if ($model) {
+            $model->update(['process_id' => 1]);
+            return response()->json([
+                'success' => true,
+                'data' => $model
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'đơn hàng không tồn tại'
+        ]);
+    }
+
+    // update đơn hàng => chưa xử lí theo mảng id
+    public function updateNoProcessArrayId(Request $request)
+    {
+        //    chưa validate
+        if (is_array($request->order_id) && $request->order_id) {
+            foreach ($request->order_id as $id) {
+                $model = Order::find($id);
+                $model->update(['process_id' => 1]);
+            }
+            return response()->json([
+                'success' => true,
+                'data' => 'update thành công'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'bạn chưa chọn đơn hàng'
+        ]);
+    }
+
+    // update đơn hàng => đang xử lí theo id
+    public function updateProcessingId($order_id)
+    {
+        // chưa validate
+        $model = Order::find($order_id);
+        if ($model) {
+            $model->update(['process_id' => 2]);
+            return response()->json([
+                'success' => true,
+                'data' => $model
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'đơn hàng không tồn tại'
+        ]);
+    }
+
+    // update đơn hàng => đang xử lí theo mảng id
+    public function updateProcessingArrayId(Request $request)
+    {
+        //    chưa validate
+        if (is_array($request->order_id) && $request->order_id) {
+            foreach ($request->order_id as $id) {
+                $model = Order::find($id);
+                $model->update(['process_id' => 2]);
+            }
+            return response()->json([
+                'success' => true,
+                'data' => 'update thành công'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'bạn chưa chọn đơn hàng'
+        ]);
+    }
+
+    // update đơn hàng => chờ giao theo id
+    public function updateAwaitDeliveryId($order_id)
+    {
+        // chưa validate
+        $model = Order::find($order_id);
+        if ($model) {
+            $model->update(['process_id' => 3]);
+            return response()->json([
+                'success' => true,
+                'data' => $model
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'đơn hàng không tồn tại'
+        ]);
+    }
+
+    // update đơn hàng => chờ giao theo mảng id
+    public function updateAwaitDeliveryArrayId(Request $request)
+    {
+        //    chưa validate
+        if (is_array($request->order_id) && $request->order_id) {
+            foreach ($request->order_id as $id) {
+                $model = Order::find($id);
+                $model->update(['process_id' => 3]);
+            }
+            return response()->json([
+                'success' => true,
+                'data' => 'update thành công'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'bạn chưa chọn đơn hàng'
+        ]);
+    }
+
+    // update đơn hàng => đang giao theo mảng id
+    public function updateDeliveringArrayId(Request $request)
+    {
+        foreach ($request->order_id as $id) {
+            $model = Order::find($id);
+            $model->update(['shipper_id' => $request->shipper_id, 'shipper_confirm' => 0]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'đã gửi yêu cầu xác nhận đơn hàng thành công'
+        ]);
+    }
+
+    // hủy bàn giao đơn hàng
+    public function cancelDeliveringArrayId(Request $request)
+    {
+        foreach ($request->order_id as $id) {
+            $model = Order::find($id);
+            $model->where('shipper_confirm', 0)->update(['shipper_id' => null, 'shipper_confirm' => null]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'đã hủy bàn giao đơn hàng thành công'
+        ]);
+    }
+
+    // cập nhật thêm ghi chú cửa hàng vào đơn hàng
+    public function updateShopNote(Request $request, $order_id)
+    {
+        $model = Order::find($order_id);
+        if ($model) {
+            $model->update(['shop_note' => $request->shop_note]);
+            return response()->json([
+                'success' => true,
+                'data' => $model
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'đơn hàng không tồn tại'
+        ]);
+    }
+
+    // shop cancel đơn hàng
+    public function shopCancelOrder($order_id)
+    {
+        $model = Order::find($order_id);
+        if ($model) {
+            $model->delete();
+            return response()->json([
+                'success' => true,
+                'data' => $model
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'đơn hàng không tồn tại'
+        ]);
+    }
+
+    // lọc đơn hàng theo trạng thái xử lí
+    public function filterOrderProcess(Request $request, $process_id)
+    {
+        $model = new Order();
+        $model = $model->where('process_id', $process_id);
+        // lọc theo hình thức thanh toán
+        if ($request->payments != null) {
+            $model = $model->where('payments', $request->payments);
+        }
+        // lọc theo nhân viên
+        if ($request->shipper_id != null) {
+            $model = $model->where('shipper_id', $request->shipper_id);
+        }
+        // lọc theo trạng thái đã add nhân viên
+        if ($request->shipper_confirm != 2) {
+            if ($request->shipper_confirm == null) {
+                $model = $model->whereNull('shipper_confirm');
+            } elseif ($request->shipper_confirm == 0) {
+                $model = $model->where('shipper_confirm', 0);
+            }
+        }
+        // lọc theo số đt
+        if ($request->customer_phone != null) {
+            $model = $model->where('customer_phone', 'like', '%' . $request->customer_phone . '%');
+        }
+
+        // lọc theo mã đơn hàng
+        if ($request->code_orders != null) {
+            $model = $model->where('code_orders', 'like', $request->code_orders);
+        }
+        $data = $model->get();
+        if ($model) {
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'không tìm thấy kết quả phù hợp'
+        ]);
+    }
+
+    // lọc đơn hàng theo trạng thái bàn giao: chưa xong
+    public function filterOrderShopConfirm(Request $request, $shop_confirm)
+    {
+        $model = new Order();
+        $model = $model->where('shop_confirm', $shop_confirm);
+        // lọc theo hình thức thanh toán
+        if ($request->payments != null) {
+            $model = $model->where('payments', $request->payments);
+        }
+        // lọc theo nhân viên
+        if ($request->shipper_id != null) {
+            $model = $model->where('shipper_id', $request->shipper_id);
+        }
+        // lọc theo trạng thái pass/failed
+        if ($request->process_id) {
+            $model = $model->where('process_id', $request->process_id);
+        }
+        // lọc theo trạng thái yêu cầu bàn giao của nhân viên
+        if ($request->shipper_confirm != 2) {
+            if ($request->shipper_confirm == null) {
+                $model = $model->whereNull('shipper_confirm');
+            } elseif ($request->shipper_confirm == 0) {
+                $model = $model->where('shipper_confirm', 0);
+            }
+        }
+        // lọc theo mã đơn hàng
+        if ($request->code_orders != null) {
+            $model = $model->where('code_orders', 'like', $request->customer_phone);
+        }
+        $data = $model->get();
+        if ($model) {
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'không tìm thấy kết quả phù hợp'
+        ]);
+    }
+
+    // list đơn hàng theo trạng thái bàn giao
+    public function get_order_shop_confirm($shop_confirm_id)
+    {
+        if ($shop_confirm_id == 1) {
+            $model = Order::where('shop_confirm', $shop_confirm_id)->get();
+            if ($model->all()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $model
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'data' => 'no data'
+                ]);
+            }
+        } elseif ($shop_confirm_id == 0) {
+            $model = Order::whereNull()->orWhere('shop_confirm', $shop_confirm_id)->get();
+            if ($model->all()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $model
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'data' => 'no data'
+                ]);
+            }
+        }
+    }
+
+    // xác nhận bàn giao từ nhân viên
+    public function update_shop_confirm(Request $request)
+    {
+        foreach ($request->order_id as $id) {
+            Order::find($id)->update(['shop_confirm' => 1]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'xác nhận bàn giao thành công'
+        ]);
+    }
+
+    // xóa mềm đơn hàng
+    public function deleteOrder(Request $request)
+    {
+        foreach ($request->order_id as $id) {
+            Order::where('id', $id)->delete();
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'xóa thành công'
+        ]);
+    }
+
+    // cập nhật trạng thái cho các đơn hàng tiếp tục xử lí
+    public function updateNewProcess(Request $request)
+    {
+        foreach ($request->order_id as $id) {
+            Order::find($id)->update(['shipper_id' => null, 'shipper_confirm' => null, 'shop_confirm' => null, 'process_id' => $request->process]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'cập nhật trạng thái cho mới cho các đơn hàng thành công'
+        ]);
+    }
+
+
+    ################### API dành cho nhân viên ###############################
+
+    // lấy đơn hàng của shipper theo trạng thái
+    public function shipper_order($shipper_id, $process_id)
+    {
+        $model = Order::where('shipper_id', $shipper_id)->where('process_id', $process_id)->get();
+        if ($model->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $model
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'no data'
+        ]);
+    }
+
+    // xác nhận đã nhận đơn hàng theo mảng order_id
+    public function updateShipperConfirm(Request $request)
+    {
+        foreach ($request->order_id as $id) {
+            Order::find($id)->update(['shipper_confirm' => 1]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'xác nhận thành công'
+        ]);
+    }
+
+    // cập nhật trạng thái thành công cho đơn hàng theo id
+    public function updateSuccessOrder($order_id)
+    {
+        $model = Order::find($order_id)->update(['process_id' => 5]);
+        return response()->json([
+            'success' => true,
+            'data' => $model
+        ]);
+    }
+    // cập nhật trạng thái hủy cho đơn hàng theo id
+    public function updateCancelOrder(Request $request, $order_id)
+    {
+        $model = Order::find($order_id)->update(['process_id' => 6, 'cancel_note' => $request->cancel_note]);
+        return response()->json([
+            'success' => true,
+            'data' => $model
+        ]);
+    }
+    // gửi yêu cầu bàn giao đơn hàng theo mảng order_id
+    public function shipperUpdateShopConfirm(Request $request)
+    {
+        foreach ($request->order_id as $id) {
+            Order::find($id)->update(['shop_confirm' => 0]);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => 'gửi yêu cầu xác nhận đơn hàng thành công'
+        ]);
+    }
+    // lấy thông tin chi tiết đơn hàng
 }

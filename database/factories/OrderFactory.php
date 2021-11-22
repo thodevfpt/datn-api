@@ -14,6 +14,7 @@ class OrderFactory extends Factory
     public function definition()
     {
         return [
+            "code_orders" => rand(11111111, 999999999),
             "total_price" => rand(100, 500),
             "customer_name" => $this->faker->name(),
             "customer_phone" => $this->faker->tollFreePhoneNumber,

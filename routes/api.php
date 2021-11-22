@@ -28,7 +28,7 @@ use App\Http\Controllers\VouchersController;
 |
 */
 // test api
-Route::get('test',[TestController::class,'testTime']);
+Route::get('test', [TestController::class, 'testTime']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // API setup data default
 
 // set data cho bảng classify_voucher
-Route::get('setup_classify_voucher', [ClassifyVouchersController::class, 'run']);
+Route::get('setup_value_default', [ClassifyVouchersController::class, 'run']);
 // setup role và permission mặc định
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
@@ -205,8 +205,56 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     });
 
     Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
-        // list đơn hàng mới của shipper =>những đơn hàng chưa được shipper xác nhận
-        Route::get('shipper/{shipper_id}', [OrderController::class, 'shipper_order']);
+        // list đơn hàng theo trạng thái
+        Route::get('process/{process_id}', [OrderController::class, 'get_order_process']);
+        // lọc đơn hàng theo trạng thái xử lí trong tab hiện tại
+        Route::get('filter/{process_id}', [OrderController::class, 'filterOrderProcess']);
+        // lọc đơn hàng theo trạng thái bàn giao trong tab hiện tại
+        Route::get('filter/{shop_confirm}', [OrderController::class, 'filterOrderShopConfirm']);
+        // update đơn hàng => chưa xử lí theo id
+        Route::put('update/no_process/id/{order_id}', [OrderController::class, 'updateNoProcessId']);
+        // update đơn hàng => chưa xử lí theo mảng id
+        Route::put('update/no_process/array_id', [OrderController::class, 'updateNoProcessArrayId']);
+        // update đơn hàng => đang xử lí theo id
+        Route::put('update/processing/id/{order_id}', [OrderController::class, 'updateProcessingId']);
+        // update đơn hàng => đang xử lí theo mảng id
+        Route::put('update/processing/array_id', [OrderController::class, 'updateProcessingArrayId']);
+        // update đơn hàng => chờ giao theo id
+        Route::put('update/await-delivery/id/{order_id}', [OrderController::class, 'updateAwaitDeliveryId']);
+        // update đơn hàng => chờ giao theo mảng id
+        Route::put('update/await-delivery/array_id', [OrderController::class, 'updateAwaitDeliveryArrayId']);
+        //  update đơn hàng => đang giao theo mảng id
+        Route::put('update/delivering/array_id', [OrderController::class, 'updateDeliveringArrayId']);
+        // hủy bàn giao đơn hàng theo mảng id
+        Route::put('update/cancel-delivering/array_id', [OrderController::class, 'cancelDeliveringArrayId']);
+        // cập nhật ghi chú của cửa hàng cho đơn hàng
+        Route::put('update/shop-note/{order_id}', [OrderController::class, 'updateShopNote']);
+        // shop hủy đơn hàng
+        Route::delete('delete/shop-cancel/{order_id}', [OrderController::class, 'shopCancelOrder']);
+        // list đơn hàng theo trạng thái bàn giao
+        Route::get('shop_confirm/{shop_confirm_id}', [OrderController::class, 'get_order_shop_confirm']);
+        // xác nhận bàn giao từ nhân viên theo mảng order_id
+        Route::put('update/shop_confirm',[OrderController::class, 'update_shop_confirm']);
+        // xóa mềm các đơn hàng theo mảng order_id
+        Route::delete('delete/array_id',[OrderController::class,'deleteOrder']);
+        // cập nhật trạng thái cho những đơn hàng tiếp tục xử lí
+        Route::put('update/new-process/array_id',[OrderController::class,'updateNewProcess']);
+
+        ############### API dành cho nhân viên #################
+        // list đơn hàng của nhân viên theo trạng thái
+        Route::get('shipper/{shipper_id}/{process_id}', [OrderController::class, 'shipper_order']);
+        // xác nhận đã nhận đơn hàng theo mảng order_id
+        Route::put('update/shipper_confirm/array_id',[OrderController::class,'updateShipperConfirm']);
+        // cập nhật trạng thái hoàn thành cho đơn hàng theo id
+        Route::put('update/success-order/{order_id}',[OrderController::class,'updateSuccessOrder']);
+        // cập nhật trạng thái hủy cho đơn hàng theo id
+        Route::put('update/cancel-order/{order_id}',[OrderController::class,'updateCancelOrder']);
+        // gửi yêu cầu bàn giao đơn hàng theo mảng order_id
+        Route::put('shipper-update/shop_confirm',[OrderController::class,'shipperUpdateShopConfirm']);
+
+
+
+
         // list order chưa bị xóa mềm
         Route::get('all', [OrderController::class, 'index']);
         // chi tiết một đơn hàng
