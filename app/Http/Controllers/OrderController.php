@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
-use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -24,7 +24,7 @@ class OrderController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Chưa có đơn hàng nào '
+                'data' => 'Chưa có đơn hàng nào '
             ]);
         }
     }
@@ -53,12 +53,12 @@ class OrderController extends Controller
             }
             return response()->json([
                 'success' => false,
-                'message' => 'Đã xảy ra lỗi khi tạo đơn hàng'
+                'data' => 'Đã xảy ra lỗi khi tạo đơn hàng'
             ]);
         }
         return response()->json([
             'success' => false,
-            'message' => 'Đơn hàng chưa có sp'
+            'data' => 'Đơn hàng chưa có sp'
         ]);
     }
     // chi tiết một đơn hàng
@@ -74,10 +74,26 @@ class OrderController extends Controller
         }
         return response()->json([
             'success' => false,
-            'message' => 'đơn hàng không tồn tại'
+            'data' => 'đơn hàng không tồn tại'
         ]);
     }
 
+    // lấy tổng đơn hàng theo các trạng thái
+    public function countOrderProcess()
+    {
+        $order = DB::table('orders')
+            ->select(DB::raw('COUNT(process_id) as count, process_id'))
+            ->groupBy('process_id');
+        $data = DB::table('order_processes')
+            ->select('count', 'name', 'process_id')
+            ->joinSub($order, 'op', function ($join) {
+                $join->on('order_processes.id', '=', 'op.process_id');
+            })->get();
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
     // lấy đơn hàng theo trạng thái xử lí
     public function get_order_process($process_id)
     {
@@ -108,7 +124,7 @@ class OrderController extends Controller
         }
         return response()->json([
             'success' => true,
-            'message' => 'đơn hàng không tồn tại'
+            'data' => 'đơn hàng không tồn tại'
         ]);
     }
 
@@ -133,12 +149,12 @@ class OrderController extends Controller
     }
 
     // update đơn hàng => đang xử lí theo id
-    public function updateProcessingId($order_id)
+    public function updateProcessingId(Request $request,$order_id)
     {
         // chưa validate
         $model = Order::find($order_id);
         if ($model) {
-            $model->update(['process_id' => 2]);
+            $model->update(['process_id' => 2,'shop_note' => $request->shop_note]);
             return response()->json([
                 'success' => true,
                 'data' => $model
@@ -171,12 +187,12 @@ class OrderController extends Controller
     }
 
     // update đơn hàng => chờ giao theo id
-    public function updateAwaitDeliveryId($order_id)
+    public function updateAwaitDeliveryId(Request $request,$order_id)
     {
         // chưa validate
         $model = Order::find($order_id);
         if ($model) {
-            $model->update(['process_id' => 3]);
+            $model->update(['process_id' => 3,'shop_note' => $request->shop_note]);
             return response()->json([
                 'success' => true,
                 'data' => $model
@@ -389,7 +405,7 @@ class OrderController extends Controller
     public function update_shop_confirm(Request $request)
     {
         foreach ($request->order_id as $id) {
-            Order::find($id)->update(['shop_confirm' => 1]);
+            Order::find($id)->update(['shop_confirm' => 1, 'time_shop_confirm' => Carbon::now()->toDateTimeString()]);
         }
         return response()->json([
             'success' => true,
@@ -444,7 +460,7 @@ class OrderController extends Controller
     public function updateShipperConfirm(Request $request)
     {
         foreach ($request->order_id as $id) {
-            Order::find($id)->update(['shipper_confirm' => 1]);
+            Order::find($id)->update(['shipper_confirm' => 1,'process_id' => 4]);
         }
         return response()->json([
             'success' => true,
@@ -482,4 +498,5 @@ class OrderController extends Controller
         ]);
     }
     // lấy thông tin chi tiết đơn hàng
+   
 }

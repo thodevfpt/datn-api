@@ -163,7 +163,12 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         // spaties
         Spatie\Permission\PermissionServiceProvider::class,
+        // config dompdf
+        Barryvdh\DomPDF\ServiceProvider::class,
+        // config import file excel
+        Maatwebsite\Excel\ExcelServiceProvider::class,
         /*
+        
          * Package Service Providers...
          */
 
@@ -229,6 +234,12 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        // comfig dompdf
+        'PDF' => Barryvdh\DomPDF\Facade::class,
+        // config for import excel
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+
+
 
     ],
 

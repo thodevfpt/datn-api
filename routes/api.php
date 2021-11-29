@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\TransportController;
 use App\Http\Controllers\VouchersController;
 
 /*
@@ -37,11 +39,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // set data cho bảng classify_voucher
 Route::get('setup_value_default', [ClassifyVouchersController::class, 'run']);
+Route::get('setup_transport', [TransportController::class, 'run']);
 // setup role và permission mặc định
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user'])->prefix('admin')->group(function () {
+// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user'])->prefix('admin')->group(function () {
+Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
@@ -205,12 +209,14 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     });
 
     Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
+        // lấy tổng đơn hàng theo trạng thái
+        Route::get('count-process', [OrderController::class, 'countOrderProcess']);
         // list đơn hàng theo trạng thái
         Route::get('process/{process_id}', [OrderController::class, 'get_order_process']);
         // lọc đơn hàng theo trạng thái xử lí trong tab hiện tại
-        Route::get('filter/{process_id}', [OrderController::class, 'filterOrderProcess']);
+        Route::get('filter/process/{process_id}', [OrderController::class, 'filterOrderProcess']);
         // lọc đơn hàng theo trạng thái bàn giao trong tab hiện tại
-        Route::get('filter/{shop_confirm}', [OrderController::class, 'filterOrderShopConfirm']);
+        Route::get('filter/shop-confirm/{shop_confirm}', [OrderController::class, 'filterOrderShopConfirm']);
         // update đơn hàng => chưa xử lí theo id
         Route::put('update/no_process/id/{order_id}', [OrderController::class, 'updateNoProcessId']);
         // update đơn hàng => chưa xử lí theo mảng id
@@ -234,23 +240,23 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         // list đơn hàng theo trạng thái bàn giao
         Route::get('shop_confirm/{shop_confirm_id}', [OrderController::class, 'get_order_shop_confirm']);
         // xác nhận bàn giao từ nhân viên theo mảng order_id
-        Route::put('update/shop_confirm',[OrderController::class, 'update_shop_confirm']);
+        Route::put('update/shop_confirm', [OrderController::class, 'update_shop_confirm']);
         // xóa mềm các đơn hàng theo mảng order_id
-        Route::delete('delete/array_id',[OrderController::class,'deleteOrder']);
+        Route::delete('delete/array_id', [OrderController::class, 'deleteOrder']);
         // cập nhật trạng thái cho những đơn hàng tiếp tục xử lí
-        Route::put('update/new-process/array_id',[OrderController::class,'updateNewProcess']);
+        Route::put('update/new-process/array_id', [OrderController::class, 'updateNewProcess']);
 
         ############### API dành cho nhân viên #################
         // list đơn hàng của nhân viên theo trạng thái
         Route::get('shipper/{shipper_id}/{process_id}', [OrderController::class, 'shipper_order']);
         // xác nhận đã nhận đơn hàng theo mảng order_id
-        Route::put('update/shipper_confirm/array_id',[OrderController::class,'updateShipperConfirm']);
+        Route::put('update/shipper_confirm/array_id', [OrderController::class, 'updateShipperConfirm']);
         // cập nhật trạng thái hoàn thành cho đơn hàng theo id
-        Route::put('update/success-order/{order_id}',[OrderController::class,'updateSuccessOrder']);
+        Route::put('update/success-order/{order_id}', [OrderController::class, 'updateSuccessOrder']);
         // cập nhật trạng thái hủy cho đơn hàng theo id
-        Route::put('update/cancel-order/{order_id}',[OrderController::class,'updateCancelOrder']);
+        Route::put('update/cancel-order/{order_id}', [OrderController::class, 'updateCancelOrder']);
         // gửi yêu cầu bàn giao đơn hàng theo mảng order_id
-        Route::put('shipper-update/shop_confirm',[OrderController::class,'shipperUpdateShopConfirm']);
+        Route::put('shipper-update/shop_confirm', [OrderController::class, 'shipperUpdateShopConfirm']);
 
 
 
@@ -259,6 +265,30 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::get('all', [OrderController::class, 'index']);
         // chi tiết một đơn hàng
         Route::get('{id}', [OrderController::class, 'detail']);
+    });
+    // API thống kê
+    Route::middleware(['role:Admin'])->prefix('analytics')->group(function () {
+        // thống kê doanh thu theo tháng - năm
+        Route::get('order/revenue/{month}/{year}', [AnalyticsController::class, 'revenue']);
+        // thống kê so sánh số đơn hàng tạo mới và số đơn hàng hoàn thành theo thời gian
+        Route::get('order/compare/create/success/{month}/{year}', [AnalyticsController::class, 'compareCreateSuccess']);
+    });
+    // API export data
+    // Route::middleware(['role:Admin'])->prefix('export')->group(function () {
+    Route::prefix('export')->group(function () {
+        Route::get('order/revenue/{month}/{year}/{type}', [AnalyticsController::class, 'ExportOrderRevenue']);
+        Route::get('order/compare/create/success/{month}/{year}/{type}', [AnalyticsController::class, 'ExportCompareCreateSuccess']);
+    });
+    Route::prefix('transport')->group(function () {
+        // lấy danh sách các tỉnh
+        Route::get('provinces',[TransportController::class, 'getProvince']);
+        // reset lại thông tin giá cước
+        Route::get('reset', [TransportController::class, 'resetTransport']);
+        // cập nhật thông tin giá cước
+        Route::put('update', [TransportController::class, 'updateTransport']);
+        // lấy thông tin config_ghn
+        Route::get('edit', [TransportController::class, 'editTransport']);
+       
     });
 });
 
@@ -322,3 +352,5 @@ Route::prefix('voucher')->group(function () {
     //danh sach voucher
     Route::get('', [VouchersController::class, 'index']);
 });
+ // lấy giá cước giao hàng cho UI
+ Route::get('price/{total}',[TransportController::class,'getPriceTransport']);

@@ -28,6 +28,7 @@ class CreateOrdersTable extends Migration
             $table->decimal('transportation_costs', 10, 0);
             $table->tinyInteger('payments');
             $table->tinyInteger('shop_confirm')->nullable();
+            $table->dateTime('time_shop_confirm')->nullable();
             $table->tinyInteger('shipper_confirm')->nullable();
             $table->text('shop_note')->nullable();
             $table->text('cancel_note')->nullable();

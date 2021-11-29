@@ -24,6 +24,7 @@ class Order extends Model
         'transportation_costs',
         'payments',
         'shop_confirm',
+        'time_shop_confirm',
         'shipper_confirm',
         'shop_note',
         'cancel_note',
