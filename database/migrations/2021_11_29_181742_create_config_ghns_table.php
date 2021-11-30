@@ -15,7 +15,7 @@ class CreateConfigGhnsTable extends Migration
     {
         Schema::create('config_ghns', function (Blueprint $table) {
             $table->id();
-            $table->integer('province_id');
+            $table->integer('provinceID');
             $table->string('token');
             $table->integer('shopId');
             $table->integer('length');

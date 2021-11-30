@@ -19,7 +19,7 @@ class AnalyticsController extends Controller
         if ($month == 0) {
             $year = $year;
             for ($i = 1; $i <= 12; $i++) {
-                $orders = Order::select('time_shop_confirm', 'total_price')->whereYear('time_shop_confirm', $year)->whereMonth('time_shop_confirm', $i)->where('process_id', 5)->get();
+                $orders = Order::withTrashed()->select('time_shop_confirm', 'total_price')->whereYear('time_shop_confirm', $year)->whereMonth('time_shop_confirm', $i)->where('process_id', 5)->get();
                 $total = 0;
                 foreach ($orders as $value) {
                     $total += $value->total_price;
@@ -41,7 +41,7 @@ class AnalyticsController extends Controller
                 // tạo đối tượng thời gian ứng với từng ngày trong tháng 
                 $time = Carbon::create($year, $month, $i);
                 // lấy các đơn hàng 
-                $orders = Order::select('time_shop_confirm', 'total_price')->whereDate('time_shop_confirm', $time)->where('process_id', 5)->get();
+                $orders = Order::withTrashed()->select('time_shop_confirm', 'total_price')->whereDate('time_shop_confirm', $time)->where('process_id', 5)->get();
                 // tính tổng giá trị đơn hàng
                 $total = 0;
                 foreach ($orders as $value) {

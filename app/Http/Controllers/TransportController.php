@@ -53,11 +53,12 @@ class TransportController extends Controller
             }
 
             // cập nhật các quận trong Hà Nội
+            $province=Province::where('ProvinceID',201)->first();
             $districts = Http::withHeaders(['token' => $token])
                 ->get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', ['province_id' => 201])['data'];
             foreach ($districts as $d) {
                 $district = new District();
-                $district->province_id = $d['ProvinceID'];
+                $district->province_id = $province->id;
                 $district->districtID = $d['DistrictID'];
                 $district->provinceName = $d['DistrictName'];
                 $district->save();
@@ -89,7 +90,7 @@ class TransportController extends Controller
                 )['data'];
             // cập nhật thông tin config_ghn vào db
             $model = new Config_ghn();
-            $model->province_id = 201;
+            $model->provinceID = 201;
             $model->token = $token;
             $model->shopId = $shopId;
             $model->length = $length;
@@ -115,13 +116,14 @@ class TransportController extends Controller
         DB::table('districts')->truncate();
         $config_ghn = Config_ghn::find(1);
         // cập nhật các quận 
-        $province_id = $request->province_id;
-        if ($province_id) {
+        $provinceID = $request->provinceID;
+        $province_id=Province::where('provinceID',$provinceID)->first()->id;
+        if ($provinceID) {
             $districts = Http::withHeaders(['token' => $config_ghn->token])
-                ->get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', ['province_id' => $province_id])['data'];
+                ->get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', ['province_id' => $provinceID])['data'];
             foreach ($districts as $d) {
                 $district = new District();
-                $district->province_id = $d['ProvinceID'];
+                $district->province_id = $province_id;
                 $district->districtID = $d['DistrictID'];
                 $district->provinceName = $d['DistrictName'];
                 $district->save();
@@ -156,7 +158,7 @@ class TransportController extends Controller
                 )['data'];
             // cập nhật config_ghn
 
-            $config_ghn->province_id = $request->province_id;
+            $config_ghn->provinceID = $request->provinceID;
             $config_ghn->length = $request->length;
             $config_ghn->width = $request->width;
             $config_ghn->height = $request->height;
@@ -196,5 +198,16 @@ class TransportController extends Controller
             'success' => true,
             'data' => $transportation_costs['total']
         ]);
+    }
+    public function getProvinceDisstrict()
+    {
+       $provinceID=Config_ghn::find(1)->provinceID;
+       $province=Province::where('provinceID',$provinceID)->first();
+       $province->load('districts');
+       return response()->json([
+        'success' => true,
+        'data' => $province
+
+    ]);
     }
 }

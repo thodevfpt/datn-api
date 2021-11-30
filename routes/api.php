@@ -44,8 +44,8 @@ Route::get('setup_transport', [TransportController::class, 'run']);
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user'])->prefix('admin')->group(function () {
-Route::prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user'])->prefix('admin')->group(function () {
+// Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
@@ -268,27 +268,28 @@ Route::prefix('admin')->group(function () {
     });
     // API thống kê
     Route::middleware(['role:Admin'])->prefix('analytics')->group(function () {
+    // Route::prefix('analytics')->group(function () {
         // thống kê doanh thu theo tháng - năm
         Route::get('order/revenue/{month}/{year}', [AnalyticsController::class, 'revenue']);
         // thống kê so sánh số đơn hàng tạo mới và số đơn hàng hoàn thành theo thời gian
         Route::get('order/compare/create/success/{month}/{year}', [AnalyticsController::class, 'compareCreateSuccess']);
     });
     // API export data
-    // Route::middleware(['role:Admin'])->prefix('export')->group(function () {
-    Route::prefix('export')->group(function () {
+    Route::middleware(['role:Admin'])->prefix('export')->group(function () {
+    // Route::prefix('export')->group(function () {
         Route::get('order/revenue/{month}/{year}/{type}', [AnalyticsController::class, 'ExportOrderRevenue']);
         Route::get('order/compare/create/success/{month}/{year}/{type}', [AnalyticsController::class, 'ExportCompareCreateSuccess']);
     });
-    Route::prefix('transport')->group(function () {
+    Route::middleware(['role:Admin'])->prefix('transport')->group(function () {
+    // Route::prefix('transport')->group(function () {
         // lấy danh sách các tỉnh
-        Route::get('provinces',[TransportController::class, 'getProvince']);
+        Route::get('provinces', [TransportController::class, 'getProvince']);
         // reset lại thông tin giá cước
         Route::get('reset', [TransportController::class, 'resetTransport']);
         // cập nhật thông tin giá cước
         Route::put('update', [TransportController::class, 'updateTransport']);
         // lấy thông tin config_ghn
         Route::get('edit', [TransportController::class, 'editTransport']);
-       
     });
 });
 
@@ -352,5 +353,9 @@ Route::prefix('voucher')->group(function () {
     //danh sach voucher
     Route::get('', [VouchersController::class, 'index']);
 });
- // lấy giá cước giao hàng cho UI
- Route::get('price/{total}',[TransportController::class,'getPriceTransport']);
+Route::prefix('transport')->group(function () {
+    // lấy giá cước giao hàng cho UI
+    Route::get('price/{total}', [TransportController::class, 'getPriceTransport']);
+    // lấy tên tỉnh và các quận trong tỉnh cho UI
+    Route::get('province/district', [TransportController::class, 'getProvinceDisstrict']);
+});

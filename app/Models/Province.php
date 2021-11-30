@@ -10,4 +10,7 @@ class Province extends Model
     use HasFactory;
     protected $table = 'provinces';
     public $timestamps = false;
+    public function districts(){
+        return $this->hasMany(District::class,'province_id');
+     }
 }
