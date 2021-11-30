@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,13 @@ class TestController extends Controller
 {
     public function testTime()
     {
+        // dd(1);
+        // dd($id);
+    //    $user=User::where('user_name','like','%tho%')->get();
+       $order=Order::where('code_orders','like','302818493')->get();
+       dd($order);
+
+
         $order = DB::table('orders')
             ->select(DB::raw('COUNT(process_id) as count, process_id'))
             ->groupBy('process_id');

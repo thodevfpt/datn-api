@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Contracts\Role;
+use Spatie\Permission\Models\Role as ModelsRole;
 
 class OrderController extends Controller
 {
@@ -223,7 +226,22 @@ class OrderController extends Controller
             'data' => 'bạn chưa chọn đơn hàng'
         ]);
     }
-
+    // lấy danh sách shipper
+    public function getRoleShipper()
+    {
+        $roleName=ModelsRole::where('name','shipper')->first();
+        if($roleName){
+            $users = User::role('shipper')->get();
+            return response()->json([
+                'success' => true,
+                'data' => $users
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'role không tồn tại trong db'
+        ]);
+    }
     // update đơn hàng => đang giao theo mảng id
     public function updateDeliveringArrayId(Request $request)
     {
@@ -327,7 +345,7 @@ class OrderController extends Controller
         ]);
     }
 
-    // lọc đơn hàng theo trạng thái bàn giao: chưa xong
+    // lọc đơn hàng theo trạng thái bàn giao
     public function filterOrderShopConfirm(Request $request, $shop_confirm)
     {
         $model = new Order();
@@ -369,6 +387,22 @@ class OrderController extends Controller
         ]);
     }
 
+    // tìm kiếm đơn hàng theo phone or code
+    public function searchPhoneOrCode(Request $request)
+    {
+        $order=new Order();
+        if($request->phone){
+            $order=$order->where('customer_phone','like','%'.$request->phone.'%');
+        }
+        if($request->code){
+            $order=$order->where('code_orders','LIKE',$request->code);
+        }
+        $order=$order->get();
+        return response()->json([
+            'success' => true,
+            'data' => $order
+        ]);
+    }
     // list đơn hàng theo trạng thái bàn giao
     public function get_order_shop_confirm($shop_confirm_id)
     {
@@ -429,7 +463,7 @@ class OrderController extends Controller
     public function updateNewProcess(Request $request)
     {
         foreach ($request->order_id as $id) {
-            Order::find($id)->update(['shipper_id' => null, 'shipper_confirm' => null, 'shop_confirm' => null, 'process_id' => $request->process]);
+            Order::find($id)->update(['shipper_id' => null, 'shipper_confirm' => null, 'shop_confirm' => null,'time_shop_confirm'=>null, 'process_id' => $request->process]);
         }
         return response()->json([
             'success' => true,

@@ -18,6 +18,7 @@ use App\Http\Controllers\SlideController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TransportController;
 use App\Http\Controllers\VouchersController;
+use App\Models\Order;
 
 /*
 |--------------------------------------------------------------------------
@@ -217,6 +218,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::get('filter/process/{process_id}', [OrderController::class, 'filterOrderProcess']);
         // lọc đơn hàng theo trạng thái bàn giao trong tab hiện tại
         Route::get('filter/shop-confirm/{shop_confirm}', [OrderController::class, 'filterOrderShopConfirm']);
+        // tìm kiếm đơn hàng theo sđt hoặc mã đh (tất cả đơn hàng chưa được lưu trữ)
+        Route::get('search/phone/code',[OrderController::class,'searchPhoneOrCode']);
         // update đơn hàng => chưa xử lí theo id
         Route::put('update/no_process/id/{order_id}', [OrderController::class, 'updateNoProcessId']);
         // update đơn hàng => chưa xử lí theo mảng id
@@ -231,6 +234,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('update/await-delivery/array_id', [OrderController::class, 'updateAwaitDeliveryArrayId']);
         //  update đơn hàng => đang giao theo mảng id
         Route::put('update/delivering/array_id', [OrderController::class, 'updateDeliveringArrayId']);
+        // lấy danh sách shipper 
+        Route::get('role/shipper',[OrderController::class,'getRoleShipper']);
         // hủy bàn giao đơn hàng theo mảng id
         Route::put('update/cancel-delivering/array_id', [OrderController::class, 'cancelDeliveringArrayId']);
         // cập nhật ghi chú của cửa hàng cho đơn hàng
