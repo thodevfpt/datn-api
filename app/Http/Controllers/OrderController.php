@@ -474,10 +474,10 @@ class OrderController extends Controller
 
     ################### API dành cho nhân viên ###############################
 
-    // lấy đơn hàng của shipper theo trạng thái
-    public function shipper_order($shipper_id, $process_id)
+    // lấy đơn hàng của shipper chưa xác nhận
+    public function shipperOrderNoConfirm($shipper_id)
     {
-        $model = Order::where('shipper_id', $shipper_id)->where('process_id', $process_id)->get();
+        $model = Order::where('shipper_id', $shipper_id)->where('shipper_confirm', 0)->get();
         if ($model->all()) {
             return response()->json([
                 'success' => true,
@@ -501,7 +501,40 @@ class OrderController extends Controller
             'data' => 'xác nhận thành công'
         ]);
     }
-
+    // list đơn hàng đang giao và chưa hoàn thành bàn giao
+    public function shipperDelivering($shipper_id)
+    {
+        $order=Order::where('shipper_id',$shipper_id)->where('process_id',4)->where(function($query){
+            $query->whereNull('shop_confirm')->orWhere('shop_confirm',0);
+        })->get();
+        if($order->all()){
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'ko có đơn hàng nào đang giao'
+        ]);
+    }
+    // list đơn hàng của nhân viên đã nhận nhưng chưa hoàn thành việc bàn giao
+    public function shipperConfirmNoShopCOnfirm($shipper_id)
+    {
+        $order=Order::where('shipper_id',$shipper_id)->where('shipper_confirm',1)->where(function($query){
+            $query->whereNull('shop_confirm')->orWhere('shop_confirm',0);
+        })->get();
+        if($order->all()){
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'ko có đơn hàng nào đang giao'
+        ]);
+    }
     // cập nhật trạng thái thành công cho đơn hàng theo id
     public function updateSuccessOrder($order_id)
     {

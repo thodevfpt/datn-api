@@ -252,10 +252,14 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('update/new-process/array_id', [OrderController::class, 'updateNewProcess']);
 
         ############### API dành cho nhân viên #################
-        // list đơn hàng của nhân viên theo trạng thái
-        Route::get('shipper/{shipper_id}/{process_id}', [OrderController::class, 'shipper_order']);
+        // list đơn hàng của nhân viên theo trạng thái chưa xác nhận
+        Route::get('shipper/no-confirm/{shipper_id}', [OrderController::class, 'shipperOrderNoConfirm']);
         // xác nhận đã nhận đơn hàng theo mảng order_id
         Route::put('update/shipper_confirm/array_id', [OrderController::class, 'updateShipperConfirm']);
+        // list đơn hàng nhân viên có trạng thái đang giao và chưa hoàn thành bàn giao
+        Route::get('shipper/delivering/no-shop-confirm/{shipper_id}',[OrderController::class, 'shipperDelivering']);
+        // list đơn hàng của nhân viên đã nhận nhưng chưa hoàn thành việc bàn giao
+        Route::get('shipper/shipper-confirm/no-shop-confirm/{shipper_id}',[OrderController::class, 'shipperConfirmNoShopCOnfirm']);
         // cập nhật trạng thái hoàn thành cho đơn hàng theo id
         Route::put('update/success-order/{order_id}', [OrderController::class, 'updateSuccessOrder']);
         // cập nhật trạng thái hủy cho đơn hàng theo id
