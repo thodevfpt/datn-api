@@ -173,6 +173,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::options('backup-all', [UserController::class, 'backupAll']);
         // đồng bộ hóa role cho user
         Route::post('syncRoles/{user_id}', [UserController::class, 'syncRoles']);
+        // list role
+        Route::get('role/all',[UserController::class,'getAllRole']);
         Route::middleware(['permission:delete user'])->group(function () {
             //xoa vĩnh viễn 1 user
             Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
