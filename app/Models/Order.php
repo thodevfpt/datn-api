@@ -35,27 +35,34 @@ class Order extends Model
         return $this->hasMany(OrderDetail::class, 'order_id');
     }
 
-     // lấy thông tin khách hàng
-     public function customer()
-     {
-         return $this->belongsTo(User::class, 'user_id');
-     }
+    // lấy thông tin khách hàng
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
-      // lấy thông tin vouher
+    // lấy thông tin vouher
     public function voucher()
     {
         return $this->belongsTo(Vouchers::class, 'voucher_id');
     }
 
-     // lấy thông tin shipper
-     public function shipper()
-     {
-         return $this->belongsTo(User::class, 'shipper_id');
-     }
+    // lấy thông tin shipper
+    public function shipper()
+    {
+        return $this->belongsTo(User::class, 'shipper_id');
+    }
 
-       // lấy thông tin process
-       public function process()
-       {
-           return $this->belongsTo(OrderProcess::class, 'process_id');
-       }
+    // lấy thông tin process
+    public function process()
+    {
+        return $this->belongsTo(OrderProcess::class, 'process_id');
+    }
+
+
+    //    lấy thông tin từ bảng feedback
+    public function feedback()
+    {
+        return $this->hasOne(Feedbacks::class, 'order_id');
+    }
 }

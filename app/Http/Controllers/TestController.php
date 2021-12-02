@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Feedbacks;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -10,14 +11,18 @@ use Illuminate\Support\Facades\DB;
 
 class TestController extends Controller
 {
-    public function testTime()
+    public function testTime(Request $request)
     {
-        // dd(1);
-        // dd($id);
-    //    $user=User::where('user_name','like','%tho%')->get();
-       $order=Order::where('code_orders','like','302818493')->get();
-       dd($order);
-
+        dd($request->all());
+        // $order = Order::where('id',6)->first();
+        // dd($order);
+    //  $model=Order::find(3);$model->load('feedback');
+    $model=Feedbacks::find(1);$model->load('order');
+     return response()->json([
+        'success'=>true,
+        'data' => $model
+    ]);
+    //  dd($model);
 
         $order = DB::table('orders')
             ->select(DB::raw('COUNT(process_id) as count, process_id'))

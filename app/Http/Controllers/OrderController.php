@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Feedbacks;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\User;
@@ -152,12 +153,12 @@ class OrderController extends Controller
     }
 
     // update đơn hàng => đang xử lí theo id
-    public function updateProcessingId(Request $request,$order_id)
+    public function updateProcessingId(Request $request, $order_id)
     {
         // chưa validate
         $model = Order::find($order_id);
         if ($model) {
-            $model->update(['process_id' => 2,'shop_note' => $request->shop_note]);
+            $model->update(['process_id' => 2, 'shop_note' => $request->shop_note]);
             return response()->json([
                 'success' => true,
                 'data' => $model
@@ -190,12 +191,12 @@ class OrderController extends Controller
     }
 
     // update đơn hàng => chờ giao theo id
-    public function updateAwaitDeliveryId(Request $request,$order_id)
+    public function updateAwaitDeliveryId(Request $request, $order_id)
     {
         // chưa validate
         $model = Order::find($order_id);
         if ($model) {
-            $model->update(['process_id' => 3,'shop_note' => $request->shop_note]);
+            $model->update(['process_id' => 3, 'shop_note' => $request->shop_note]);
             return response()->json([
                 'success' => true,
                 'data' => $model
@@ -229,8 +230,8 @@ class OrderController extends Controller
     // lấy danh sách shipper
     public function getRoleShipper()
     {
-        $roleName=ModelsRole::where('name','shipper')->first();
-        if($roleName){
+        $roleName = ModelsRole::where('name', 'shipper')->first();
+        if ($roleName) {
             $users = User::role('shipper')->get();
             return response()->json([
                 'success' => true,
@@ -290,6 +291,7 @@ class OrderController extends Controller
     {
         $model = Order::find($order_id);
         if ($model) {
+            $model->update(['process_id' => 6]);
             $model->delete();
             return response()->json([
                 'success' => true,
@@ -390,14 +392,14 @@ class OrderController extends Controller
     // tìm kiếm đơn hàng theo phone or code
     public function searchPhoneOrCode(Request $request)
     {
-        $order=new Order();
-        if($request->phone){
-            $order=$order->where('customer_phone','like','%'.$request->phone.'%');
+        $order = new Order();
+        if ($request->phone) {
+            $order = $order->where('customer_phone', 'like', '%' . $request->phone . '%');
         }
-        if($request->code){
-            $order=$order->where('code_orders','LIKE',$request->code);
+        if ($request->code) {
+            $order = $order->where('code_orders', 'LIKE', $request->code);
         }
-        $order=$order->get();
+        $order = $order->get();
         return response()->json([
             'success' => true,
             'data' => $order
@@ -420,7 +422,7 @@ class OrderController extends Controller
                 ]);
             }
         } elseif ($shop_confirm_id == 0) {
-            $model = Order::whereNull()->orWhere('shop_confirm', $shop_confirm_id)->get();
+            $model = Order::whereNull('shop_confirm')->orWhere('shop_confirm', $shop_confirm_id)->get();
             if ($model->all()) {
                 return response()->json([
                     'success' => true,
@@ -451,7 +453,11 @@ class OrderController extends Controller
     public function deleteOrder(Request $request)
     {
         foreach ($request->order_id as $id) {
-            Order::where('id', $id)->delete();
+            $order = Order::find($id);
+            if ($order->process_id == 4) {
+                $order->update(['process_id' => 6]);
+            }
+            $order->delete();
         }
         return response()->json([
             'success' => true,
@@ -463,7 +469,7 @@ class OrderController extends Controller
     public function updateNewProcess(Request $request)
     {
         foreach ($request->order_id as $id) {
-            Order::find($id)->update(['shipper_id' => null, 'shipper_confirm' => null, 'shop_confirm' => null,'time_shop_confirm'=>null, 'process_id' => $request->process]);
+            Order::find($id)->update(['shipper_id' => null, 'shipper_confirm' => null, 'shop_confirm' => null, 'time_shop_confirm' => null, 'process_id' => $request->process_id]);
         }
         return response()->json([
             'success' => true,
@@ -494,7 +500,7 @@ class OrderController extends Controller
     public function updateShipperConfirm(Request $request)
     {
         foreach ($request->order_id as $id) {
-            Order::find($id)->update(['shipper_confirm' => 1,'process_id' => 4]);
+            Order::find($id)->update(['shipper_confirm' => 1, 'process_id' => 4]);
         }
         return response()->json([
             'success' => true,
@@ -504,10 +510,10 @@ class OrderController extends Controller
     // list đơn hàng đang giao và chưa hoàn thành bàn giao
     public function shipperDelivering($shipper_id)
     {
-        $order=Order::where('shipper_id',$shipper_id)->where('process_id',4)->where(function($query){
-            $query->whereNull('shop_confirm')->orWhere('shop_confirm',0);
+        $order = Order::where('shipper_id', $shipper_id)->where('process_id', 4)->where(function ($query) {
+            $query->whereNull('shop_confirm')->orWhere('shop_confirm', 0);
         })->get();
-        if($order->all()){
+        if ($order->all()) {
             return response()->json([
                 'success' => true,
                 'data' => $order
@@ -521,10 +527,10 @@ class OrderController extends Controller
     // list đơn hàng của nhân viên đã nhận nhưng chưa hoàn thành việc bàn giao
     public function shipperConfirmNoShopCOnfirm($shipper_id)
     {
-        $order=Order::where('shipper_id',$shipper_id)->where('shipper_confirm',1)->where(function($query){
-            $query->whereNull('shop_confirm')->orWhere('shop_confirm',0);
+        $order = Order::where('shipper_id', $shipper_id)->where('shipper_confirm', 1)->where(function ($query) {
+            $query->whereNull('shop_confirm')->orWhere('shop_confirm', 0);
         })->get();
-        if($order->all()){
+        if ($order->all()) {
             return response()->json([
                 'success' => true,
                 'data' => $order
@@ -564,6 +570,130 @@ class OrderController extends Controller
             'data' => 'gửi yêu cầu xác nhận đơn hàng thành công'
         ]);
     }
-    // lấy thông tin chi tiết đơn hàng
-   
+
+    ###################### API của khách hàng ################
+
+    // ds các đơn hàng đang xử lí
+    public function orderCustomerProcessing($custom_id)
+    {
+        $order = Order::where('user_id', $custom_id)->whereIn('process_id', [1, 2, 3])->get();
+        if ($order->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'không có đơn hàng nào'
+        ]);
+    }
+    // ds các đơn hàng đang giao
+    public function orderCustomerDelivering($custom_id)
+    {
+        $order = Order::where('user_id', $custom_id)->where('process_id', 4)->get();
+        if ($order->all()) {
+            $shipper = User::where('id', $custom_id)->first();
+            $shipperInfo = $shipper->info_user;
+            if ($shipperInfo->all()) {
+                foreach ($order as $o) {
+                    $o->shipperInfo = $shipperInfo[0];
+                }
+            }
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'không có đơn hàng nào'
+        ]);
+    }
+    // ds các đơn hàng đã giao
+    public function orderCustomerSuccess($custom_id)
+    {
+        $order = DB::table('orders')->where('user_id', $custom_id)->where('process_id', 5)->get();
+        if ($order->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'không có đơn hàng nào'
+        ]);
+    }
+    // list đơn hàng hiển thị mặc định
+    public function orderDefault($custom_id)
+    {
+        $order = Order::where('user_id', $custom_id)->where('process_id', '<', 5)->orderByDesc('process_id')->get();
+        if ($order->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        } else {
+            $order = Order::withTrashed()->where('user_id', $custom_id)->where('process_id', 5)->orderByDesc('time_shop_confirm')->get();
+            if ($order->all()) {
+                $order->load('feedback');
+                foreach ($order as $o) {
+                    if (!$o->feedback) {
+                        $orderNew[] = $o;
+                    }
+                }
+                return response()->json([
+                    'success' => true,
+                    'data' => $orderNew
+                ]);
+            }
+        }
+    }
+    // đánh giá đơn hàng
+    public function postFeedback(Request $request, $order_id)
+    {
+        $feedback = new Feedbacks();
+        $feedback->order_id = $order_id;
+        $feedback->content = $request->content;
+        $feedback->point = $request->point;
+        $feedback->day_format=Carbon::now()->day;
+        $feedback->month_format=Carbon::now()->month;
+        $feedback->save();
+        return response()->json([
+            'success' => true,
+            'data' => $feedback
+        ]);
+    }
+    // list đơn hàng theo trạng thái đánh giá
+
+    public function getOrderStatusFeedback($status, $custom_id)
+    {
+        $order = Order::withTrashed()->where('user_id', $custom_id)->where('process_id', 5)->orderByDesc('time_shop_confirm')->get();
+        if ($order->all()) {
+            $order->load('feedback');
+            foreach ($order as $o) {
+                if ($o->feedback) {
+                    $feedback[] = $o;
+                }else{
+                    $noFeedback[] = $o;
+                }
+            }
+            if($status==0){
+                return response()->json([
+                    'success' => true,
+                    'data' => $noFeedback
+                ]);
+            }elseif($status==1){
+                return response()->json([
+                    'success' => true,
+                    'data' => $feedback
+                ]); 
+            }
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'không có đơn hàng nào'
+        ]);
+    }
 }

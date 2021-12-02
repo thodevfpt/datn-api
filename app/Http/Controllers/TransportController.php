@@ -113,6 +113,7 @@ class TransportController extends Controller
     // update transport
     public function updateTransport(Request $request)
     {
+        // dd(1);
         DB::table('districts')->truncate();
         $config_ghn = Config_ghn::find(1);
         // cập nhật các quận 
