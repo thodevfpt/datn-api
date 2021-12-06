@@ -2,15 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CreateAccount;
+use App\Mail\NotifiOrder;
+use App\Mail\VerifyOrder;
+use App\Mail\VerifyOrderNew;
 use App\Models\Feedbacks;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TestController extends Controller
 {
+    public function sendMail()
+    {
+        $data=[
+            'notifi'=>'tạo đơn hàng thành công'
+        ];
+        Mail::to('thonvps09672@fpt.edu.vn')->queue(new NotifiOrder($data));
+        dd('done');
+        $user=new User();
+        $user->password='12345';
+        $user->user_name='thọ nguyễn';
+        $user->email='thonvps09672@fpt.edu.vn';
+        $user->save();
+        # 1.5 gửi email thông báo đơn hàng
+        $data=[
+            'name'=>$user->user_name,
+            'password'=>$user->password,
+            'url'=>'login.com'
+        ];
+        Mail::to($user->email)->later(now()->addMinutes(1), new CreateAccount($data));
+        dd('done');
+        // ////////////////////////
+        $to_email='thonvps09672@fpt.edu.vn';
+        $data=[
+            'code'=>'12345',
+            'name'=>'thọ đẹp trai'
+        ];
+        Mail::to($to_email)->send((new VerifyOrder($data)));
+        dd('send mail success');
+    }
     public function testTime(Request $request)
     {
         dd($request->all());

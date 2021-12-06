@@ -60,7 +60,7 @@ class TransportController extends Controller
                 $district = new District();
                 $district->province_id = $province->id;
                 $district->districtID = $d['DistrictID'];
-                $district->provinceName = $d['DistrictName'];
+                $district->districtName = $d['DistrictName'];
                 $district->save();
             }
 
@@ -126,7 +126,7 @@ class TransportController extends Controller
                 $district = new District();
                 $district->province_id = $province_id;
                 $district->districtID = $d['DistrictID'];
-                $district->provinceName = $d['DistrictName'];
+                $district->districtName = $d['DistrictName'];
                 $district->save();
             }
 

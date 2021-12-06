@@ -17,7 +17,7 @@ class CreateDistrictsTable extends Migration
             $table->id();
             $table->integer('province_id');
             $table->integer('districtID');
-            $table->string('provinceName');
+            $table->string('districtName');
         });
     }
 
