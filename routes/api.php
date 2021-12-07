@@ -41,11 +41,11 @@ use FontLib\Table\Type\post;
 Route::get('test', [TestController::class, 'testTime']);
 Route::get('send-mail', [TestController::class, 'sendMail']);
 Route::get('test-email', function () {
-    $data = Order::find(1);
+    $data=Order::find(1);
     $data->load('voucher');
-    $data = $data->toArray();
+    $data= $data->toArray();
     // dd($data);
-    // return new NotifiOrder($data);
+    return new NotifiOrder($data);
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -59,8 +59,8 @@ Route::get('setup_transport', [TransportController::class, 'run']);
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
-Route::prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
+    // Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
@@ -316,7 +316,7 @@ Route::prefix('admin')->group(function () {
         Route::get('', [FeedbacksController::class, 'index']);
         // lọc và sắp xếp; sort=0 => cũ nhất; sort=1 => mới nhất
         Route::get('filter', [FeedbacksController::class, 'filter']);
-        // thống kê feedback
+        // thống kê feedback 
         Route::get('analytics/{month}/{year}', [FeedbacksController::class, 'analytics']);
     });
     Route::middleware(['role:Admin'])->prefix('transport')->group(function () {
@@ -377,8 +377,8 @@ Route::prefix('order')->group(function () {
     // verify email create order
     Route::get('verify/email', [OrderController::class, 'verifyEmail']);
     // payment with MOMO
-    Route::get('payment/momo', [OrderController::class, 'paymentWithMomo']);
-    // add order
+    Route::get('payment/momo',[OrderController::class,'paymentWithMomo']);
+    // add order 
     Route::post('add', [OrderController::class, 'add']);
     // list order chưa bị xóa mềm
     Route::get('all', [OrderController::class, 'index']);

@@ -32,11 +32,8 @@ class VoucherRequest extends FormRequest
             'customer_type'=> 'required',
             'condition'=> 'required',
             'expiration'=> 'required',
-            'active'=> 'required',
-            'planning'=> 'required',
             'times'=> 'required',
             'start_day'=> 'required',
-            'end_day'=> 'required',
         ];
     }
       public function messages()

@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CreateAccount;
+use App\Mail\NotifiOrder;
+use App\Mail\VerifyOrder;
+use App\Models\AddressCustom;
 use App\Models\Feedbacks;
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -9,12 +13,66 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Contracts\Role;
 use Spatie\Permission\Models\Role as ModelsRole;
 
 class OrderController extends Controller
 {
+    ################# API order for UI #######################
+    // verify email create order
+    public function verifyEmail(Request $request)
+    {
+        // tạo code
+        $code = rand(1111, 9999);
+        $data = [
+            'name' => $request->name,
+            'code' => $code
+        ];
+        Mail::to($request->email)->queue(new VerifyOrder($data));
+        return response()->json([
+            'success' => true,
+            'data' => $code
+        ]);
+    }
+    // payment with momo
+    public function paymentWithMomo(Request $request)
+    {
+        // validate để amount>50000
+        $amount = (int)$request->amount;
+        $partnerCode = 'MOMO9NX020211127';
+        $accessKey = '5h0W4SQKf3jzZxvR';
+        $secretKey = 'bvgxHxx5lfXXoZApDXqkg3gHCOyVtkiP';
+        $orderInfo = 'Thanh toán đơn hàng tại MarkVeget';
+        $redirectUrl = 'http://localhost:8000/result';
+        $ipnUrl = 'http://localhost:8000/result';
+        $orderId = time();
+        $requestId = time();
+        $requestType = "captureWallet";
+        $extraData = "";
+        $rawSignature = "accessKey=" . $accessKey . "&amount=" . $amount . "&extraData=" . $extraData . "&ipnUrl=" . $ipnUrl . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&partnerCode=" . $partnerCode . "&redirectUrl=" . $redirectUrl . "&requestId=" . $requestId . "&requestType=" . $requestType;
+        $signature = hash_hmac("sha256", $rawSignature, $secretKey);
 
+        $param = [
+            'partnerCode' => $partnerCode,
+            'requestId' => $requestId,
+            'amount' => $amount,
+            'orderId' => $orderId,
+            'orderInfo' => $orderInfo,
+            'redirectUrl' => $redirectUrl,
+            'ipnUrl' => $ipnUrl,
+            'requestType' => $requestType,
+            'extraData' => $extraData,
+            'lang' =>  'vi',
+            'autoCapture' => false, // không tự động chuyển tiền vào ví đối tác ngay
+            'signature' => $signature
+        ];
+
+        $response = Http::post('https://test-payment.momo.vn/v2/gateway/api/create', $param);
+        //    chuyển hướng đến trang thanh toán của MOMO
+        return redirect($response->json()['payUrl']);
+    }
     // list order chưa bị xóa mềm
     public function index(Request $request)
     {
@@ -36,13 +94,26 @@ class OrderController extends Controller
     // thêm mới order
     public function add(Request $request)
     {
-        // kiểm tra đơn hàng có sp ko
+        /**
+         * i.	Lưu thông tin đơn hàng vào bảng order
+         *ii.	Lưu thông tin chi tiết đơn hàng vào bảng order_detail
+         *iii.	Lưu thông tin địa chỉ thanh toán của khách hàng vào bảng AddressCustom
+         *iv.	Tạo tk cho khách hàng
+         *v.	Gửi email thông báo đơn hàng
+         *vi.	Gửi email thông báo thông tin tk
+         *vii.	Trả về kết quả cho người dùng
+         *viii. cập nhật order_id vào bảng payments
+
+         */
+        #1. lưu thông tin đơn hàng vào db
+        #1.1 kiểm tra đơn hàng có sp ko
         if ($request->products) {
             $order = new Order();
             $order->fill($request->all());
             $order->code_orders = time();
             $order->save();
             if ($order->id) {
+                # 1.2 lưu thông tin chi tiết đơn hàng vào bảng detail
                 $arr_pro_details = $request->products;
                 foreach ($arr_pro_details as $detail) {
                     $detail['order_id'] = $order->id;
@@ -50,15 +121,45 @@ class OrderController extends Controller
                     $order_detail->fill($detail);
                     $order_detail->save();
                 }
+                # 1.3 lưu thông tin địa chỉ của kh
+                if ($order->user_id) {
+                    $addressCustom = new AddressCustom();
+                    $addressCustom->fill($request->only(
+                        'user_id',
+                        'customer_name',
+                        'customer_email',
+                        'customer_phone',
+                        'provinceID',
+                        'districtID',
+                        'customer_address'
+                    ));
+                    $addressCustom->save();
+                }
+                # 1.4 tạo tk cho kh
+                $user = new User();
+                $password='12345';
+                $user->password =$password ;
+                $user->user_name = $request->customer_name;
+                $user->email = $request->customer_email;
+                $user->save();
+                # 1.5 gửi email thông báo đơn hàng
+                $data = [
+                    'data' => 'tạo đơn hàng thành công'
+                ];
+                Mail::to($request->customer_email)->later(now()->addMinutes(1), new NotifiOrder($data));
+                # 1.6 gửi email thông báo thông tin tk
+                $data = [
+                    'name' => $user->user_name,
+                    'password' => $password,
+                    'url' => 'login.com'
+                ];
+                Mail::to($request->customer_email)->later(now()->addMinutes(2), new CreateAccount($data));
+                # 1.7 trả về thông tin đơn hàng cho người dùng
                 return response()->json([
                     'success' => true,
-                    'data' => $order
+                    'data' => 'Đơn hàng tạo thành công'
                 ]);
             }
-            return response()->json([
-                'success' => false,
-                'data' => 'Đã xảy ra lỗi khi tạo đơn hàng'
-            ]);
         }
         return response()->json([
             'success' => false,
@@ -657,8 +758,8 @@ class OrderController extends Controller
         $feedback->order_id = $order_id;
         $feedback->content = $request->content;
         $feedback->point = $request->point;
-        $feedback->day_format=Carbon::now()->day;
-        $feedback->month_format=Carbon::now()->month;
+        $feedback->day_format = Carbon::now()->day;
+        $feedback->month_format = Carbon::now()->month;
         $feedback->save();
         return response()->json([
             'success' => true,
@@ -675,20 +776,20 @@ class OrderController extends Controller
             foreach ($order as $o) {
                 if ($o->feedback) {
                     $feedback[] = $o;
-                }else{
+                } else {
                     $noFeedback[] = $o;
                 }
             }
-            if($status==0){
+            if ($status == 0) {
                 return response()->json([
                     'success' => true,
                     'data' => $noFeedback
                 ]);
-            }elseif($status==1){
+            } elseif ($status == 1) {
                 return response()->json([
                     'success' => true,
                     'data' => $feedback
-                ]); 
+                ]);
             }
         }
         return response()->json([

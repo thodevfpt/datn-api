@@ -18,11 +18,13 @@ class Order extends Model
         'process_id',
         'total_price',
         'customer_name',
+        'customer_email',
         'customer_phone',
         'customer_address',
         'customer_note',
         'transportation_costs',
         'payments',
+        'paymentID',
         'shop_confirm',
         'time_shop_confirm',
         'shipper_confirm',
@@ -64,5 +66,10 @@ class Order extends Model
     public function feedback()
     {
         return $this->hasOne(Feedbacks::class, 'order_id');
+    }
+    // lấy thông tin payment
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'order_id');
     }
 }

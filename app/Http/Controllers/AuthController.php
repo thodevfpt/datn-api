@@ -42,6 +42,7 @@ class AuthController extends Controller
         $user = new User();
         $user->fill($request->all());
         $user->save();
+        // cập nhật các voucher cho kh
         $vouchers=Vouchers::all();
         $voucher_id=[];
         foreach($vouchers as $v){
@@ -83,7 +84,7 @@ class AuthController extends Controller
         //  check email
         $user = User::where('email', $email)->first();
         if ($user && Hash::check($password, $user->password)) {
-            $user->load(['info_user','roles','carts','vouchers']);
+            $user->load(['info_user','roles','carts','vouchers','address_custom']);
             $token = $user->createToken('auth_login')->plainTextToken;
             return response()->json([
                 'success' => true,
