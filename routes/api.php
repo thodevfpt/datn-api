@@ -19,7 +19,13 @@ use App\Http\Controllers\SlideController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TransportController;
 use App\Http\Controllers\VouchersController;
+use App\Mail\CreateAccount;
+use App\Mail\NotifiOrder;
+use App\Mail\test;
+use App\Mail\VerifyOrder;
+use App\Mail\VerifyOrderNew;
 use App\Models\Order;
+use FontLib\Table\Type\post;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +39,14 @@ use App\Models\Order;
 */
 // test api
 Route::get('test', [TestController::class, 'testTime']);
-
+Route::get('send-mail', [TestController::class, 'sendMail']);
+Route::get('test-email', function () {
+    $data = Order::find(1);
+    $data->load('voucher');
+    $data = $data->toArray();
+    // dd($data);
+    // return new NotifiOrder($data);
+});
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -46,14 +59,17 @@ Route::get('setup_transport', [TransportController::class, 'run']);
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user'])->prefix('admin')->group(function () {
-// Route::prefix('admin')->group(function () {
+// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
+Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
-    Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
+    // Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
+        Route::prefix('product')->group(function () {
         // danh sách tất cả các sp chưa bị xóa mềm
         Route::get('', [ProductController::class, 'index']);
+        // filter
+        Route::get('filter/admin', [ProductController::class, 'filterAdmin']);
         // thêm mới 1 sp
         Route::post('store', [ProductController::class, 'store']);
         // cập nhật 1 sp
@@ -174,7 +190,7 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         // đồng bộ hóa role cho user
         Route::post('syncRoles/{user_id}', [UserController::class, 'syncRoles']);
         // list role
-        Route::get('role/all',[UserController::class,'getAllRole']);
+        Route::get('role/all', [UserController::class, 'getAllRole']);
         Route::middleware(['permission:delete user'])->group(function () {
             //xoa vĩnh viễn 1 user
             Route::delete('force-delete/{id}', [UserController::class, 'forceDelete']);
@@ -237,7 +253,7 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('update/await-delivery/array_id', [OrderController::class, 'updateAwaitDeliveryArrayId']);
         //  update đơn hàng => đang giao theo mảng id
         Route::put('update/delivering/array_id', [OrderController::class, 'updateDeliveringArrayId']);
-        // lấy danh sách shipper 
+        // lấy danh sách shipper
         Route::get('role/shipper', [OrderController::class, 'getRoleShipper']);
         // hủy bàn giao đơn hàng theo mảng id
         Route::put('update/cancel-delivering/array_id', [OrderController::class, 'cancelDeliveringArrayId']);
@@ -254,7 +270,16 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         // cập nhật trạng thái cho những đơn hàng tiếp tục xử lí
         Route::put('update/new-process/array_id', [OrderController::class, 'updateNewProcess']);
 
-        ############### API dành cho nhân viên #################
+
+
+
+        // list order chưa bị xóa mềm
+        Route::get('all', [OrderController::class, 'index']);
+        // chi tiết một đơn hàng
+        Route::get('{id}', [OrderController::class, 'detail']);
+    });
+    Route::middleware(['role:Admin|shipper'])->prefix('order')->group(function () {
+        ############### API dành cho nhân viên shiiper #################
         // 1. list đơn hàng của nhân viên theo trạng thái chưa xác nhận
         Route::get('shipper/no-confirm/{shipper_id}', [OrderController::class, 'shipperOrderNoConfirm']);
         // xác nhận đã nhận đơn hàng theo mảng order_id
@@ -269,11 +294,7 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('update/cancel-order/{order_id}', [OrderController::class, 'updateCancelOrder']);
         // gửi yêu cầu bàn giao đơn hàng theo mảng order_id
         Route::put('shipper-update/shop_confirm', [OrderController::class, 'shipperUpdateShopConfirm']);
-
-
-        // list order chưa bị xóa mềm
-        Route::get('all', [OrderController::class, 'index']);
-        // chi tiết một đơn hàng
+        // chi tiết đơn hàng
         Route::get('{id}', [OrderController::class, 'detail']);
     });
     // API thống kê
@@ -286,17 +307,17 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     });
     // API export data
     Route::middleware(['role:Admin'])->prefix('export')->group(function () {
-    // Route::prefix('export')->group(function () {
+        // Route::prefix('export')->group(function () {
         Route::get('order/revenue/{month}/{year}/{type}', [AnalyticsController::class, 'ExportOrderRevenue']);
         Route::get('order/compare/create/success/{month}/{year}/{type}', [AnalyticsController::class, 'ExportCompareCreateSuccess']);
     });
     Route::prefix('feedback')->group(function () {
         // list ds feedback
-        Route::get('',[FeedbacksController::class,'index']);
+        Route::get('', [FeedbacksController::class, 'index']);
         // lọc và sắp xếp; sort=0 => cũ nhất; sort=1 => mới nhất
-        Route::get('filter',[FeedbacksController::class,'filter']);
-        // thống kê feedback 
-        Route::get('analytics/{month}/{year}',[FeedbacksController::class,'analytics']);
+        Route::get('filter', [FeedbacksController::class, 'filter']);
+        // thống kê feedback
+        Route::get('analytics/{month}/{year}', [FeedbacksController::class, 'analytics']);
     });
     Route::middleware(['role:Admin'])->prefix('transport')->group(function () {
         // Route::prefix('transport')->group(function () {
@@ -317,8 +338,8 @@ Route::prefix('product')->group(function () {
     Route::get('', [ProductController::class, 'index']);
     // chi tiết 1 sp
     Route::get('detail/{id}', [ProductController::class, 'show']);
-    // danh sách tất cả các sp chưa bị xóa mềm
-    Route::get('', [ProductController::class, 'index']);
+    // filter
+    Route::get('filter/user', [ProductController::class, 'filterUser']);
 });
 
 Route::prefix('category')->group(function () {
@@ -353,7 +374,11 @@ Route::prefix('comment')->group(function () {
 });
 
 Route::prefix('order')->group(function () {
-    // list all order chưa bị xóa mềm
+    // verify email create order
+    Route::get('verify/email', [OrderController::class, 'verifyEmail']);
+    // payment with MOMO
+    Route::get('payment/momo', [OrderController::class, 'paymentWithMomo']);
+    // add order
     Route::post('add', [OrderController::class, 'add']);
     // list order chưa bị xóa mềm
     Route::get('all', [OrderController::class, 'index']);
@@ -387,10 +412,9 @@ Route::prefix('customer')->group(function () {
     // ds các đơn hàng đã giao
     Route::get('success/{custom_id}', [OrderController::class, 'orderCustomerSuccess']);
     // list danh sách đơn hàng hiển thị mặc định
-    Route::get('order/default/{custom_id}',[OrderController::class, 'orderDefault']);
+    Route::get('order/default/{custom_id}', [OrderController::class, 'orderDefault']);
     // đánh giá đơn hàng
-    Route::post('feedback/add/{order_id}',[OrderController::class, 'postFeedback']);
+    Route::post('feedback/add/{order_id}', [OrderController::class, 'postFeedback']);
     // list đơn hàng đã theo trạng thái đánh giá => chưa đánh giá -> 0; đã đánh giá -> 1
-    Route::get('order/feedback/{status}/{custom_id}',[OrderController::class, 'getOrderStatusFeedback']);
-    
+    Route::get('order/feedback/{status}/{custom_id}', [OrderController::class, 'getOrderStatusFeedback']);
 });

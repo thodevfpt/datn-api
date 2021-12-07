@@ -38,7 +38,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'no data'
+                'data' => 'no data'
             ]);
         }
     }
@@ -46,10 +46,16 @@ class CategoryController extends Controller
     public function list_pro($cate_id)
     {
         $category = Category::query()->find($cate_id);
-        $category->load('products');
+        if ($category) {
+            $category->load('products');
+            return response()->json([
+                'success' => true,
+                'data' => $category->products,
+            ]);
+        }
         return response()->json([
-            'success' => true,
-            'data' => $category->products,
+            'success' => false,
+            'data' => 'no data'
         ]);
     }
 
@@ -78,7 +84,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'no data'
+                'data' => 'no data'
             ]);
         }
     }
@@ -95,7 +101,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'no data'
+                'data' => 'no data'
             ]);
         }
     }
@@ -112,7 +118,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'no data'
+                'data' => 'no data'
             ]);
         }
     }
@@ -129,7 +135,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'no data'
+                'data' => 'no data'
             ]);
         }
     }
@@ -144,7 +150,7 @@ class CategoryController extends Controller
         }
         return response()->json([
             'success' => true,
-            'data' => []
+            'data' => 'xóa thành công'
         ]);
     }
 
@@ -161,7 +167,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'no data'
+                'data' => 'no data'
             ]);
         }
     }
@@ -179,7 +185,7 @@ class CategoryController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'no data'
+                'data' => 'no data'
             ]);
         }
     }
@@ -192,7 +198,7 @@ class CategoryController extends Controller
         }
         return response()->json([
             'success' => true,
-            'data' => $categories
+            'data' => 'back up thành công'
         ]);
     }
 }

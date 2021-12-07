@@ -29,34 +29,22 @@ class CategoryRequest extends FormRequest
     public function rules()
     {
 
-
-        $rule=[
-            'status' => 'numeric',
-        ];
        if($this->id){
         $rule['name']=[
-            'required',
+            'required','max:255',
             Rule::unique('categories')->ignore($this->id)
         ];
        }else{
         $rule['name']=[
-            'required',
-            Rule::unique('categories')
+            'required','max:255',//tối đa 255 ký tự
+            Rule::unique('categories')// không trùng tên
         ];
        }
 
 
         return $rule;
     }
-    public function messages()
-    {
-        return [
 
-            'name.required'=>'Hãy nhập tên danh mục',
-            'name.unique'=>'Tên danh mục đã tồn tại xin mời nhập tên khác.',
-            'status.numeric'=>'Hãy chọn trạng thái hi'
-        ];
-    }
     protected function failedValidation(Validator $validator)
     {
         $errors = $validator->errors();
