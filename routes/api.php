@@ -64,9 +64,12 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
-    Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
+    // Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
+        Route::prefix('product')->group(function () {
         // danh sách tất cả các sp chưa bị xóa mềm
         Route::get('', [ProductController::class, 'index']);
+        // filter
+        Route::get('filter/admin', [ProductController::class, 'filterAdmin']);
         // thêm mới 1 sp
         Route::post('store', [ProductController::class, 'store']);
         // cập nhật 1 sp
@@ -250,7 +253,7 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('update/await-delivery/array_id', [OrderController::class, 'updateAwaitDeliveryArrayId']);
         //  update đơn hàng => đang giao theo mảng id
         Route::put('update/delivering/array_id', [OrderController::class, 'updateDeliveringArrayId']);
-        // lấy danh sách shipper 
+        // lấy danh sách shipper
         Route::get('role/shipper', [OrderController::class, 'getRoleShipper']);
         // hủy bàn giao đơn hàng theo mảng id
         Route::put('update/cancel-delivering/array_id', [OrderController::class, 'cancelDeliveringArrayId']);
@@ -335,8 +338,8 @@ Route::prefix('product')->group(function () {
     Route::get('', [ProductController::class, 'index']);
     // chi tiết 1 sp
     Route::get('detail/{id}', [ProductController::class, 'show']);
-    // danh sách tất cả các sp chưa bị xóa mềm
-    Route::get('', [ProductController::class, 'index']);
+    // filter
+    Route::get('filter/user', [ProductController::class, 'filterUser']);
 });
 
 Route::prefix('category')->group(function () {

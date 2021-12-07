@@ -16,7 +16,8 @@ class Product extends Model
         'image',
         'price',
         'sale',
-        'quantity',
+        'status',
+        'expiration_date',
         'desc_short',
         'description'
     ];

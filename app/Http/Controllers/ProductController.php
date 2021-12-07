@@ -4,63 +4,129 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
 use App\Models\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     // danh sách các sp chưa bị xóa mềm
-    public function index(Request $request)
+    public function index()
     {
-        $keyword=$request->input('keyword');
-        $sort=$request->input('sort');
-        $sort_name=$request->input('sort_name');
-        $sort_price=$request->input('sort_price');
-        $cate=$request->input('cate');
-        $quantity=$request->input('quantity');
-        $query= new Product();
-        // $products->load('category');
-        if($keyword){
-            $query=$query->where('name','like','%'.$keyword.'%');
-        }
-        if($sort){
-            $query=$query->orderBy('created_at',$sort);
-        }
-         if($sort_name){
-             $query=$query->orderBy('name',$sort_name);
-        }
-         if($sort_price){
-             $query=$query->orderBy('price',$sort_price);
-        }
-         if($cate){
-             $query=$query->where('cate_id','=',$cate);
-        }
-          if($quantity){
-             $query=$query->where('quantity','=',$quantity);
-        }
-        $product=$query->get();
-        if ($product->all()) {
+        $products = Product::all();
+        if ($products->all()) {
+            $products->load('category');
             return response()->json([
                 'success' => true,
-                'data' => $product
+                'data' => $products
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'Chưa có sản phẩm nào trong dữ liệu'
+        ]);
+    }
+    // filter product admin
+    public function filterAdmin(Request $request)
+    {
+        $product = new Product();
+        if ($request->keyword) {
+            $product = $product->where('name', 'like', '%' . $request->keyword . '%');
+        }
+        if ($request->cate_id) {
+            $product = $product->where('cate_id', $request->cate_id);
+        }
+        if ($request->sale != null && $request->sale == 0) {
+            $product = $product->whereNull('sale');
+        }
+        if ($request->sale != null && $request->sale == 1) {
+            $product = $product->whereNotNull('sale');
+        }
+        if ($request->expiration_date != null && $request->expiration_date == 0) {
+            $product = $product->whereDate('expiration_date', '<', Carbon::now()->toDateString());
+        }
+        if ($request->expiration_date != null && $request->expiration_date == 1) {
+            $product = $product->whereDate('expiration_date', '>=', Carbon::now()->toDateString());
+        }
+        if ($request->sort == 1) {
+            $product = $product->orderByDesc('id'); //mới nhất
+        }
+        if ($request->sort == 2) {
+            $product = $product->orderBy('id'); //cũ nhất
+        }
+        if ($request->sort == 3) {
+            $product = $product->orderBy('name'); //tăng theo anpha
+        }
+        if ($request->sort == 4) {
+            $product = $product->orderByDesc('name'); //giảm theo anpha
+        }
+        $products = $product->get();
+        if ($products->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $products
             ]);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Chưa có sản phẩm nào trong dữ liệu'
+                'data' => 'ko có sản phẩm phù hợp'
+            ]);
+        }
+    }
+
+    // filter product user
+    public function filterUser(Request $request)
+    {
+        $product = new Product();
+        if ($request->keyword) {
+            $product = $product->where('name', 'like', '%' . $request->keyword . '%');
+        }
+        if ($request->cate_id) {
+            $product = $product->where('cate_id', $request->cate_id);
+        }
+        if ($request->sale != null && $request->sale == 0) {
+            $product = $product->whereNull('sale');
+        }
+        if ($request->sale != null && $request->sale == 1) {
+            $product = $product->whereNotNull('sale');
+        }
+        if ($request->sort == 1) {
+            $product = $product->orderByDesc('id'); //mới nhất
+        }
+        if ($request->sort == 2) {
+            $product = $product->orderBy('id'); //cũ nhất
+        }
+        if ($request->sort == 3) {
+            $product = $product->orderBy('price'); //tăng theo giá
+        }
+        if ($request->sort == 4) {
+            $product = $product->orderByDesc('price'); //giảm theo giá
+        }
+        $products = $product->get();
+        if ($products->all()) {
+            return response()->json([
+                'success' => true,
+                'data' => $products
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'data' => 'ko có sản phẩm phù hợp'
             ]);
         }
     }
 
     //list_comments
-    public function list_comments($pro_id){
-        $product=Product::query()->find($pro_id);
-        $product->load('comments');
-        return response()->json([
-            'success'=>true,
-            'data'=> $product->comments,
+    public function list_comments($pro_id)
+    {
+        $product = Product::query()->find($pro_id);
+        if ($product) {
+            $product->load('comments');
+            return response()->json([
+                'success' => true,
+                'data' => $product->comments,
 
-        ]);
-
+            ]);
+        }
     }
 
     // thêm mới 1 sp
@@ -89,7 +155,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sản phẩm không tồn tại'
+                'data' => 'sản phẩm không tồn tại'
             ]);
         }
     }
@@ -98,6 +164,7 @@ class ProductController extends Controller
     {
         $product = Product::withTrashed()->find($id);
         if ($product) {
+            $product->load('category');
             return response()->json([
                 'success' => true,
                 'data' => $product
@@ -105,7 +172,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Sản phẩm chưa tồn tại'
+                'data' => 'Sản phẩm chưa tồn tại'
             ]);
         }
     }
@@ -123,7 +190,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sản phẩm không tồn tại'
+                'data' => 'sản phẩm không tồn tại'
             ]);
         }
     }
@@ -141,7 +208,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'sản phẩm không tồn tại'
+                'data' => 'sản phẩm không tồn tại'
             ]);
         }
     }
@@ -156,7 +223,7 @@ class ProductController extends Controller
         }
         return response()->json([
             'success' => true,
-            'data' => []
+            'data' => 'xóa thành công'
         ]);
     }
 
@@ -173,7 +240,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Chưa có sản phẩm bị xóa trong dữ liệu'
+                'data' => 'Chưa có sản phẩm bị xóa trong dữ liệu'
             ]);
         }
     }
@@ -192,7 +259,7 @@ class ProductController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Sản phẩm chưa tồn tại'
+                'data' => 'Sản phẩm chưa tồn tại'
             ]);
         }
     }
@@ -205,7 +272,7 @@ class ProductController extends Controller
         }
         return response()->json([
             'success' => true,
-            'data' => $products
+            'data' => 'backup thành công'
         ]);
     }
 }
