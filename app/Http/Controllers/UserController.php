@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
+use App\Models\ModelHasRole;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,37 +12,50 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    // list user chưa bị xóa mềm có bao gồm lọc
+    // list user
     public function index(Request $request)
     {
-        $name = $request->name;
-        $role = $request->role;
-        $email = $request->email;
-        $sort = $request->sort;
-        $query = new User;
-        if ($name) {
-            $query = $query->where('user_name', 'like', '%' . $name . '%');
+        $user=User::all();
+        if($user->all()){
+            $user->load('info_user');
+            return response()->json([
+                'success' => true,
+                'data' => $user
+            ]);
         }
-        if ($role > 0) {
-            $query = $query->where('role', $role);
+        return response()->json([
+            'success' => false,
+            'data' => 'chưa có user trong db'
+        ]);
+    }
+    // filter user 
+    public function filterUser(Request $request)
+    {
+        $user = new User;
+        $data=ModelHasRole::all();
+        $user_role=[];
+        foreach($data as $d){
+            $user_role[]=$d->model_id;
         }
-        if ($email) {
-            $query = $query->where('user_name', 'like', '%' . $email . '%');
+        if ($request->role !=null && $request->role==0) {
+            $user = $user->whereNotIn('id', $user_role);
         }
-        if ($sort == 1) {
-            // tăng dần theo anpha
-            $query = $query->orderBy('user_name');
-        } elseif ($sort == 2) {
-            // giảm dần theo anpha
-            $query = $query->orderByDesc('user_name');
-        } elseif ($sort == 3) {
-            // cập nhật mới nhất
-            $query = $query->orderByDesc('created_at');
-        } elseif ($sort == 4) {
-            // cập nhật cũ nhất
-            $query = $query->orderBy('created_at');
+        if ($request->role !=null && $request->role==1) {
+            $user = $user->whereIn('id', $user_role);
         }
-        $user = $query->get();
+       if ($request->sort == 1) {
+            $user = $user->orderBy('id');//cũ nhất
+        }
+        if ($request->sort == 2) {
+            $user = $user->orderByDesc('id');//mới nhất
+        }
+        if ($request->sort == 3) {
+            $user = $user->orderBy('user_name');//tăng dần theo anpha
+        }
+        if ($request->sort == 4) {
+            $user = $user->orderByDesc('user_name');//giảm dần theo anpha
+        }
+         $user=$user->get();
         if ($user->all()) {
             $user->load('info_user');
             return response()->json([
@@ -51,7 +65,7 @@ class UserController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'data' => 'không có sp phù hợp trong db'
+                'data' => 'không có user phù hợp trong db'
             ]);
         }
     }
@@ -178,7 +192,7 @@ class UserController extends Controller
     }
     public function getAllRole()
     {
-        $role=Role::all();
+        $role=Role::where('id','<>',1)->get();
         return response()->json([
             'success' => true,
             'data' => $role

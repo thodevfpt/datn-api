@@ -16,10 +16,10 @@ class CreateInfoUsersTable extends Migration
         Schema::create('info_users', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->string('phone');
+            $table->string('phone')->unique();
             $table->text('address');
             $table->date('birthday');
-            $table->tinyInteger('gender')->default(1);
+            $table->tinyInteger('gender');
             $table->string('image',255);
             $table->timestamps();
         });

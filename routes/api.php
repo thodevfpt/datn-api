@@ -175,14 +175,16 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     });
 
     Route::middleware(['role:Admin|manager user'])->prefix('user')->group(function () {
-        // list user chưa bị xóa mềm có bao gồm lọc
+        // list user chưa bị xóa mềm 
         Route::get('', [UserController::class, 'index']);
+        // filter user
+        Route::get('filter', [UserController::class, 'filterUser']);
         //xoa mềm 1 user
         Route::delete('delete/{id}', [UserController::class, 'delete']);
         //list user đã xóa mềm
         Route::get('trashed/all', [UserController::class, 'trashed']);
         // get user theo id
-        Route::get('{id}', [UserController::class, 'show']);
+        Route::get('detail/{id}', [UserController::class, 'show']);
         //restor 1 user
         Route::options('backup-one/{id}', [UserController::class, 'backupOne']);
         //restor all user đã xóa mềm
