@@ -14,7 +14,6 @@ class Vouchers extends Model
     public $fillable = [
         'classify_voucher_id',
         'title',
-        'code',
         'sale',
         'customer_type',
         'condition',

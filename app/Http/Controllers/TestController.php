@@ -9,6 +9,7 @@ use App\Mail\VerifyOrderNew;
 use App\Models\Feedbacks;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Vouchers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,9 @@ class TestController extends Controller
     }
     public function testTime(Request $request)
     {
-        dd($request->all());
+        $v=Vouchers::find(6);
+        $v->users()->sync([1,2]);
+        dd('done');
         // $order = Order::where('id',6)->first();
         // dd($order);
     //  $model=Order::find(3);$model->load('feedback');

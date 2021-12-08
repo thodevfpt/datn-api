@@ -49,14 +49,13 @@ class VouchersController extends Controller
         }
         return response()->json([
             'success' => false,
-            'message' => 'no data'
+            'data' => 'no data'
         ]);
     }
-    // list voucher chưa xóa mềm
-    public function index()
+    // list voucher chưa active
+    public function NoActive()
     {
-        $query = new Vouchers();
-        $voucher = $query->get();
+        $voucher = Vouchers::where('active',0)->get();
         if ($voucher->all()) {
             return response()->json([
                 'success' => true,
@@ -69,8 +68,24 @@ class VouchersController extends Controller
             ]);
         }
     }
+     // list voucher đã active
+     public function Active()
+     {
+         $voucher = Vouchers::where('active',1)->get();
+         if ($voucher->all()) {
+             return response()->json([
+                 'success' => true,
+                 'data' => $voucher
+             ]);
+         } else {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'no data'
+             ]);
+         }
+     }
     // add voucher
-    public function store(VoucherRequest $request)
+    public function store(Request $request)
     {
         $model = new Vouchers();
         $model->fill($request->all());
@@ -84,9 +99,9 @@ class VouchersController extends Controller
         ]);
     }
     // update voucher
-    public function update(VoucherRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        $voucher = Vouchers::query()->find($id);
+        $voucher = Vouchers::where('id',$id)->where('active',0)->first();
         if ($voucher) {
             $voucher->fill($request->all());
             $start_day = Carbon::create($request->start_day);
@@ -100,7 +115,7 @@ class VouchersController extends Controller
         }
         return response()->json([
             'success' => false,
-            'data' => 'update thất bại'
+            'data' => 'Voucher ko tồn tại hoặc đã được kích hoạt'
         ]);
     }
     // show voucher

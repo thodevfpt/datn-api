@@ -24,8 +24,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('voucher:active')->dailyAt('18:55');
-        $schedule->command('voucher:remove')->dailyAt('19:00');
+        $schedule->command('voucher:active')->dailyAt('19:39');//00:00:00
+        $schedule->command('voucher:remove')->dailyAt('19:36');//23:00:00
+        $schedule->command('product:outStock')->dailyAt('19:36');//00:00:00
     }
 
     /**

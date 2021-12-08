@@ -17,7 +17,6 @@ class CreateVouchersTable extends Migration
             $table->id();
             $table->integer('classify_voucher_id');
             $table->string('title');
-            $table->string('code',191);
             $table->tinyInteger('sale');
             $table->string('customer_type',255);
             $table->decimal('condition',10,0);

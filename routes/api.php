@@ -41,9 +41,9 @@ use FontLib\Table\Type\post;
 Route::get('test', [TestController::class, 'testTime']);
 Route::get('send-mail', [TestController::class, 'sendMail']);
 Route::get('test-email', function () {
-    $data=Order::find(1);
+    $data = Order::find(1);
     $data->load('voucher');
-    $data= $data->toArray();
+    $data = $data->toArray();
     // dd($data);
     return new NotifiOrder($data);
 });
@@ -59,13 +59,13 @@ Route::get('setup_transport', [TransportController::class, 'run']);
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
-    // Route::prefix('admin')->group(function () {
+// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
+Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
     // Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
-        Route::prefix('product')->group(function () {
+    Route::prefix('product')->group(function () {
         // danh sách tất cả các sp chưa bị xóa mềm
         Route::get('', [ProductController::class, 'index']);
         // filter
@@ -156,15 +156,17 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::get('classify_vouchers/all', [VouchersController::class, 'list_Classify_vouchers']);
         // active planning
         Route::post('planning/{id}', [VouchersController::class, 'planning']);
-        //danh sach voucher
-        Route::get('', [VouchersController::class, 'index']);
+        //danh sach voucher chưa active
+        Route::get('no-active', [VouchersController::class, 'NoActive']);
+        //danh sach voucher đã active
+        Route::get('active', [VouchersController::class, 'Active']);
         //them moi voucher
         Route::post('store', [VouchersController::class, 'store']);
         //sua  voucher
         Route::put('update/{id}', [VouchersController::class, 'update']);
         //xoa mem
         Route::delete('delete/{id}', [VouchersController::class, 'destroy']);
-        //thung rac
+        //list voucher đã lưu trữ
         Route::get('trashed', [VouchersController::class, 'trashed']);
         // xóa vĩnh viễn
         Route::delete('force-delete/{id}', [VouchersController::class, 'forceDelete']);
@@ -379,7 +381,7 @@ Route::prefix('order')->group(function () {
     // verify email create order
     Route::get('verify/email', [OrderController::class, 'verifyEmail']);
     // payment with MOMO
-    Route::get('payment/momo',[OrderController::class,'paymentWithMomo']);
+    Route::get('payment/momo', [OrderController::class, 'paymentWithMomo']);
     // add order 
     Route::post('add', [OrderController::class, 'add']);
     // list order chưa bị xóa mềm
