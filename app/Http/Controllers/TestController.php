@@ -48,6 +48,10 @@ class TestController extends Controller
     }
     public function testTime(Request $request)
     {
+        $user=User::find(16);
+        $test=$user->update(['user_name'=>'tôi là tôi 1']);
+        // $user->delete();
+        dd($test);
         $v=Vouchers::find(6);
         $v->users()->sync([1,2]);
         dd('done');

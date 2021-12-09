@@ -166,6 +166,31 @@ class OrderController extends Controller
             'data' => 'Đơn hàng chưa có sp'
         ]);
     }
+    // customer cancel order
+    public function cancelOrder(Request $request,$order_id)
+    {
+        $order=Order::find($order_id);
+        if($order){
+            $order=Order::where('id',$order_id)->whereIn('process_id',[1,2,3])->whereNull('shipper_confirm')->first();
+            if($order){
+                $order->update(['process_id'=>6]);
+                $order->delete();
+                return response()->json([
+                    'success' => true,
+                    'data' => $order
+                ]); 
+            }else{
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đơn hàng đang được giao, bạn không thể xóa đơn hàng này'
+                ]);  
+            }
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'Đơn hàng không tìm thấy'
+        ]);
+    }
     // chi tiết một đơn hàng
     public function detail($id)
     {

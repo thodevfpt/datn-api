@@ -54,7 +54,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // set data cho bảng classify_voucher
 Route::get('setup_value_default', [ClassifyVouchersController::class, 'run']);
-Route::get('setup_transport', [TransportController::class, 'run']);
+Route::get('setup_transport', [TransportController::class, 'resetTransport']);
 // setup role và permission mặc định
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
@@ -386,6 +386,8 @@ Route::prefix('order')->group(function () {
     Route::get('payment/momo', [OrderController::class, 'paymentWithMomo']);
     // add order 
     Route::post('add', [OrderController::class, 'add']);
+    // cancel order
+    Route::post('cancel/{order_id}', [OrderController::class, 'cancelOrder']);
     // list order chưa bị xóa mềm
     Route::get('all', [OrderController::class, 'index']);
     // list 1 order theo user_id
