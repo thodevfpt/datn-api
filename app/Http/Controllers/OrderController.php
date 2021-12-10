@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderRequest;
 use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
 use App\Mail\VerifyOrder;
@@ -99,7 +100,7 @@ class OrderController extends Controller
     }
 
     // thêm mới order
-    public function add(Request $request)
+    public function add(OrderRequest $request)
     {
         /**
          *1.	Validate dl
@@ -115,6 +116,12 @@ class OrderController extends Controller
 
          */
         // validate để đơn hàng có số sp >0
+        if (!$request->products) {
+            return response()->json([
+                'success' => false,
+                'data' => 'Chưa có sp nào trong đơn hàng'
+            ]);
+        }
         # Xử lí
         # Nếu là khách hàng mới
         if ($request->user_id == null) {
