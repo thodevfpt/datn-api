@@ -52,6 +52,21 @@ class VouchersController extends Controller
             'data' => 'no data'
         ]);
     }
+    // list all voucher
+    public function index()
+    {
+        $voucher= Vouchers::all();
+        if($voucher->all()){
+            return response()->json([
+                'success' => true,
+                'data' => $voucher
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'no voucher'
+        ]);
+    }
     // list voucher chưa active
     public function NoActive()
     {

@@ -14,6 +14,8 @@ use App\Models\OrderDetail;
 use App\Models\Payment;
 use App\Models\Province;
 use App\Models\User;
+use App\Models\Voucher_users;
+use App\Models\Vouchers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -113,7 +115,8 @@ class OrderController extends Controller
          *6.	Gửi mail thông báo thông tin tk  có kèm button LOGIN nếu là kh mới
          *7.	Gửi mail thông báo đặt hàng thành công có kèm button HỦY
          *8.	Cập nhật địa chỉ của khách hàng vào bảng address_custom
-         *9.	Trả về thông tin đơn hàng
+         *9.    Kiểm tra voucher => nếu chỉ sử dụng một lần thì cần xóa mềm khỏi bảng voucher_users => chỉ áp dụng với kh có tk
+         *10.	Trả về thông tin đơn hàng
 
 
          */
@@ -159,10 +162,10 @@ class OrderController extends Controller
             $order = new Order();
             $order->user_id = $user->id;
             $order->code_orders = time();
-            $province=Province::where('provinceID',$request->provinceID)->first()->provinceName;
-            $district=District::where('districtID',$request->districtID)->first()->districtName;
-            $order->customer_address=$request->customer_address.', '.$district.', Tỉnh/TP '.$province;
-            $order->fill($request->except('user_id','customer_address'));
+            $province = Province::where('provinceID', $request->provinceID)->first()->provinceName;
+            $district = District::where('districtID', $request->districtID)->first()->districtName;
+            $order->customer_address = $request->customer_address . ', ' . $district . ', Tỉnh/TP ' . $province;
+            $order->fill($request->except('user_id', 'customer_address'));
             $order->save();
             #3. Lưu chi tiết đơn hàng
             $arr_pro_details = $request->products;
@@ -185,12 +188,12 @@ class OrderController extends Controller
                 ]
             );
             #5. Lưu order_id vào bảng payment nếu có thanh toán online
-            if ($request->paymentID) {
-                Payment::updateOrCreate(
-                    ['paymentID' => $request->paymentID],
-                    ['order_id' => $order->id]
-                );
-            }
+            // if ($request->paymentID) {
+            //     Payment::updateOrCreate(
+            //         ['paymentID' => $request->paymentID],
+            //         ['order_id' => $order->id]
+            //     );
+            // }
             #6. Gửi mail thông báo đặt hàng thành công
             $data = [
                 'data' => 'tạo đơn hàng thành công'
@@ -207,9 +210,9 @@ class OrderController extends Controller
             $order = new Order();
             $order->code_orders = time();
             $order->fill($request->except('customer_address'));
-            $province=Province::where('provinceID',$request->provinceID)->first()->provinceName;
-            $district=District::where('districtID',$request->districtID)->first()->districtName;
-            $order->customer_address=$request->customer_address.', '.$district.', Tỉnh/TP '.$province;
+            $province = Province::where('provinceID', $request->provinceID)->first()->provinceName;
+            $district = District::where('districtID', $request->districtID)->first()->districtName;
+            $order->customer_address = $request->customer_address . ', ' . $district . ', Tỉnh/TP ' . $province;
             $order->save();
             #3. Lưu chi tiết đơn hàng
             $arr_pro_details = $request->products;
@@ -232,18 +235,25 @@ class OrderController extends Controller
                 ]
             );
             #5. Lưu order_id vào bảng payment nếu có thanh toán online
-            if ($request->paymentID) {
-                Payment::updateOrCreate(
-                    ['paymentID' => $request->paymentID],
-                    ['order_id' => $order->id]
-                );
-            }
+            // if ($request->paymentID) {
+            //     Payment::updateOrCreate(
+            //         ['paymentID' => $request->paymentID],
+            //         ['order_id' => $order->id]
+            //     );
+            // }
             #6. Gửi mail thông báo đặt hàng thành công
             $data = [
                 'data' => 'tạo đơn hàng thành công'
             ];
             Mail::to($request->customer_email)->send((new NotifiOrder($order))->afterCommit());
-            #7. Trả về thông tin đơn hàng
+            #7  Xóa những voucher chỉ sử dụng một lần nếu có
+            if ($request->voucher_id) {
+                $time = Vouchers::find($request->voucher_id)->times;
+                if ($time == 1) {
+                    Voucher_users::where('user_id', $request->user_id)->where('voucher_id', $request->voucher_id)->delete();
+                }
+            }
+            #8. Trả về thông tin đơn hàng
             return response()->json([
                 'success' => true,
                 'data' => $order
