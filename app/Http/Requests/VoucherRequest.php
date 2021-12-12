@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
+
 class VoucherRequest extends FormRequest
 {
     /**
@@ -24,16 +27,19 @@ class VoucherRequest extends FormRequest
      */
     public function rules()
     {
+        $now=Carbon::now()->toDateString();
         return [
-            'classify_voucher_id'=> 'required',
-            'title'=> 'required',
-            'code'=> 'required',
-            'sale'=> 'required',
-            'customer_type'=> 'required',
-            'condition'=> 'required',
-            'expiration'=> 'required',
-            'times'=> 'required',
-            'start_day'=> 'required',
+            'classify_voucher_id'=> [
+                'required',
+                Rule::in([1,2,3])
+            ],
+            'title'=> 'required|max:255',
+            'sale'=> 'required|gt:0|max:100',
+            'customer_type'=> 'required|max:255',
+            'condition'=> 'required|min:0|max:100000000',
+            'expiration'=> 'required|gt:0|max:100',
+            'times'=> 'required|gt:0|max:100',
+            'start_day'=> "required|date|after:$now"
         ];
     }
       public function messages()

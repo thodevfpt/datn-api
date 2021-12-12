@@ -7,9 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <title>Document</title>
   <style>
     body {
@@ -463,6 +461,9 @@
 </head>
 
 <body>
+  @php
+  $date=date_format(date_create($order->created_at) ,"d-m-Y H:i:s");
+  @endphp
   <section class="section-all bill">
     <div class="container">
       <div class="col-lg-6 m-auto bd-m p-0">
@@ -471,8 +472,8 @@
         </div>
         <div class="header__mail">
           <div class="tt_mail">
-            <span class="d-block">Bạn vừa nhận được đơn hàng mới từ ...</span>
-            <span class="d-block">Đơn hàng: ...</span>
+            <span class="d-block">Mã đơn hàng: <b>{{$order->code_orders}}</b></span>
+            <span class="d-block">Ngày tạo: <b>{{$date}}</b></span>
           </div>
         </div>
         <div class="col-lg-11 m-auto">
@@ -484,27 +485,13 @@
             </div>
 
             <div class="text-95 text-secondary-d3">
+              @foreach($order->order_details as $p)
               <div class="row mb-sm-0 py-3 bt_1">
-                <div class="col-lg-5 col-md-5 col-5 text-center d-block fz-mb-1">Táo</div>
-                <div class="col-lg-3 col-md-3 col-3 text-center d-block fz-mb-1">2</div>
-                <div class="col-lg-4 col-md-4 col-4 text-center d-block fz-mb-1 text-secondary-d2 ">200.000 đ</div>
+                <div class="col-lg-5 col-md-5 col-5 text-center d-block fz-mb-1">{{$p->standard_name}}</div>
+                <div class="col-lg-3 col-md-3 col-3 text-center d-block fz-mb-1">{{$p->quantity}}</div>
+                <div class="col-lg-4 col-md-4 col-4 text-center d-block fz-mb-1 text-secondary-d2 ">{{$p->standard_price}} đ</div>
               </div>
-
-              <div class="row mb-sm-0 py-3 bt_1">
-                <div class="col-lg-5 col-md-5 col-5 text-center d-block fz-mb-1">Vải</div>
-                <div class="col-lg-3 col-md-3 col-3 text-center d-block fz-mb-1">3</div>
-                <div class="col-lg-4 col-md-4 col-4 text-center d-block fz-mb-1 text-secondary-d2">270.000 đ</div>
-              </div>
-              <div class="row mb-sm-0 py-3 bt_1">
-                <div class="col-lg-5 col-md-5 col-5 text-center d-block fz-mb-1">Cóc</div>
-                <div class="col-lg-3 col-md-3 col-3 text-center d-block fz-mb-1">10</div>
-                <div class="col-lg-4 col-md-4 col-4 text-center d-block fz-mb-1 text-secondary-d2">500.000 đ</div>
-              </div>
-              <div class="row mb-sm-0 py-3 bt_1">
-                <div class="col-lg-5 col-md-5 col-5 text-center d-block fz-mb-1">Ổi</div>
-                <div class="col-lg-3 col-md-3 col-3 text-center d-block fz-mb-1">3</div>
-                <div class="col-lg-4 col-md-4 col-4 text-center d-block fz-mb-1 text-secondary-d2">210.000 đ</div>
-              </div>
+              @endforeach
             </div>
             <div class="text-95 text-secondary-d3">
               <div class="row mb-sm-0 py-3 bt_1">
@@ -553,9 +540,9 @@
             <p class="text-150 fz-mb">Thông tin khách hàng</p>
             <div class="row pt-3">
               <div class="col-lg-6 ">
-                <p class="fz-mb">Khách hàng:... </p>
-                <p class="fz-mb">Địa chỉ:... </p>
-                <p class="fz-mb">Số diện thoại:... </p>
+                <p class="fz-mb">Tên khách hàng: <b>{{$order->customer_name}} </b></p>
+                <p class="fz-mb">Số điện thoại: <b>{{$order->customer_phone}} </b></p>
+                <p class="fz-mb">Địa chỉ: <b>{{$order->customer_address}} </b></p>
               </div>
             </div>
           </div>

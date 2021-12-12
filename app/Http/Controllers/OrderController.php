@@ -7,10 +7,12 @@ use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
 use App\Mail\VerifyOrder;
 use App\Models\AddressCustom;
+use App\Models\District;
 use App\Models\Feedbacks;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Payment;
+use App\Models\Province;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -157,7 +159,10 @@ class OrderController extends Controller
             $order = new Order();
             $order->user_id = $user->id;
             $order->code_orders = time();
-            $order->fill($request->except('user_id'));
+            $province=Province::where('provinceID',$request->provinceID)->first()->provinceName;
+            $district=District::where('districtID',$request->districtID)->first()->districtName;
+            $order->customer_address=$request->customer_address.', '.$district.', Tỉnh/TP '.$province;
+            $order->fill($request->except('user_id','customer_address'));
             $order->save();
             #3. Lưu chi tiết đơn hàng
             $arr_pro_details = $request->products;
@@ -190,7 +195,7 @@ class OrderController extends Controller
             $data = [
                 'data' => 'tạo đơn hàng thành công'
             ];
-            Mail::to($request->customer_email)->send((new NotifiOrder($data))->afterCommit());
+            Mail::to($request->customer_email)->send((new NotifiOrder($order))->afterCommit());
             #7. Trả về thông tin đơn hàng
             return response()->json([
                 'success' => true,
@@ -200,9 +205,11 @@ class OrderController extends Controller
             # Nếu là khách hàng đã có tk
             #2. Lưu đơn hàng
             $order = new Order();
-            // $order->user_id = $user->id;
             $order->code_orders = time();
-            $order->fill($request->all());
+            $order->fill($request->except('customer_address'));
+            $province=Province::where('provinceID',$request->provinceID)->first()->provinceName;
+            $district=District::where('districtID',$request->districtID)->first()->districtName;
+            $order->customer_address=$request->customer_address.', '.$district.', Tỉnh/TP '.$province;
             $order->save();
             #3. Lưu chi tiết đơn hàng
             $arr_pro_details = $request->products;
@@ -235,7 +242,7 @@ class OrderController extends Controller
             $data = [
                 'data' => 'tạo đơn hàng thành công'
             ];
-            Mail::to($request->customer_email)->send((new NotifiOrder($data))->afterCommit());
+            Mail::to($request->customer_email)->send((new NotifiOrder($order))->afterCommit());
             #7. Trả về thông tin đơn hàng
             return response()->json([
                 'success' => true,

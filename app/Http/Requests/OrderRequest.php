@@ -48,9 +48,9 @@ class OrderRequest extends FormRequest
     {
         $errors = $validator->errors();
         $response = response()->json([
-            'message' => 'Invalid data send',
-            'details' => $errors->messages(),
-        ], 422);
+            'success' => false,
+            'data' => 'Chưa có sp nào trong đơn hàng'
+        ],);
         throw new HttpResponseException($response);
     }
 }

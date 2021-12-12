@@ -41,11 +41,9 @@ use FontLib\Table\Type\post;
 Route::get('test', [TestController::class, 'testTime']);
 Route::get('send-mail', [TestController::class, 'sendMail']);
 Route::get('test-email', function () {
-    $data = Order::find(1);
-    $data->load('voucher');
-    $data = $data->toArray();
-    // dd($data);
-    return new NotifiOrder($data);
+    $order = Order::find(9);
+    $order->load('voucher','order_details');
+    return new NotifiOrder($order);
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -393,7 +391,7 @@ Route::prefix('order')->group(function () {
     // list 1 order theo user_id
 
     // chi tiết một đơn hàng
-    Route::get('{id}', [OrderController::class, 'detail']);
+    Route::get('detail/{id}', [OrderController::class, 'detail']);
 });
 
 Route::prefix('cart')->group(function () {
