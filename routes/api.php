@@ -59,13 +59,13 @@ Route::get('setup_transport', [TransportController::class, 'run']);
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
-Route::prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
+// Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
-    // Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
-    Route::prefix('product')->group(function () {
+    Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
+    // Route::prefix('product')->group(function () {
         // danh sách tất cả các sp chưa bị xóa mềm
         Route::get('', [ProductController::class, 'index']);
         // filter
@@ -177,7 +177,7 @@ Route::prefix('admin')->group(function () {
     });
 
     Route::middleware(['role:Admin|manager user'])->prefix('user')->group(function () {
-        // list user chưa bị xóa mềm 
+        // list user chưa bị xóa mềm
         Route::get('', [UserController::class, 'index']);
         // filter user
         Route::get('filter', [UserController::class, 'filterUser']);
@@ -320,7 +320,7 @@ Route::prefix('admin')->group(function () {
         Route::get('', [FeedbacksController::class, 'index']);
         // lọc và sắp xếp; sort=0 => cũ nhất; sort=1 => mới nhất
         Route::get('filter', [FeedbacksController::class, 'filter']);
-        // thống kê feedback 
+        // thống kê feedback
         Route::get('analytics/{month}/{year}', [FeedbacksController::class, 'analytics']);
     });
     Route::middleware(['role:Admin'])->prefix('transport')->group(function () {
@@ -377,6 +377,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('comment')->group(function () {
     Route::get('', [CommentController::class, 'index']);
     Route::post('store', [CommentController::class, 'store']);
+    Route::get('comment/{pro_id}', [ProductController::class, 'list_comments']);
 });
 
 Route::prefix('order')->group(function () {
@@ -384,7 +385,7 @@ Route::prefix('order')->group(function () {
     Route::get('verify/email', [OrderController::class, 'verifyEmail']);
     // payment with MOMO
     Route::get('payment/momo', [OrderController::class, 'paymentWithMomo']);
-    // add order 
+    // add order
     Route::post('add', [OrderController::class, 'add']);
     // list order chưa bị xóa mềm
     Route::get('all', [OrderController::class, 'index']);
