@@ -15,9 +15,9 @@ class UserController extends Controller
     // list user
     public function index(Request $request)
     {
-        $user=User::all();
+        $user=User::where('id','<>',1)->get();
         if($user->all()){
-            $user->load('info_user');
+            $user->load('info_user','roles');
             return response()->json([
                 'success' => true,
                 'data' => $user

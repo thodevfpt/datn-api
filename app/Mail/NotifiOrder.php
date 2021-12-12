@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -17,11 +18,11 @@ class NotifiOrder extends Mailable implements ShouldQueue
      * @return void
      */
     public $subject;
-    public $data;
-    public function __construct($data)
+    public $order;
+    public function __construct(Order $order)
     {
         $this->subject='Thông báo tạo mới đơn hàng thành công tại MarkVeget';
-        $this->data=$data;
+        $this->order=$order;
     }
     
     /**
@@ -31,6 +32,6 @@ class NotifiOrder extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject($this->subject)->view('emails.notifi-order',$this->data);
+        return $this->subject($this->subject)->view('emails.notifi-order');
     }
 }

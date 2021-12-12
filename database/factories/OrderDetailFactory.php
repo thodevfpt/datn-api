@@ -16,10 +16,10 @@ class OrderDetailFactory extends Factory
     {
         return [
         'order_id' =>Order::all()->random()->id,
-        'product_id'=>rand(1,100),
+        'product_id'=>rand(1,10),
         'standard_price'=>rand(20,100),
         'standard_name'=>$this->faker->name(),
-        'quantity'=>rand(1,10),
+        'quantity'=>rand(1,5),
         ];
     }
 }

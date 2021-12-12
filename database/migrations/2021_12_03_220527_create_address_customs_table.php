@@ -17,7 +17,7 @@ class CreateAddressCustomsTable extends Migration
             $table->id();
             $table->integer('user_id');
             $table->string('customer_name');
-            $table->string('customer_email')->unique();
+            $table->string('customer_email');
             $table->string('customer_phone');
             $table->decimal('provinceID',12,0);
             $table->decimal('districtID',12,0);

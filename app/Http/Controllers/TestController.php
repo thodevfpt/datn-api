@@ -48,6 +48,17 @@ class TestController extends Controller
     }
     public function testTime(Request $request)
     {
+        $number=range(0,9); shuffle($number);
+        $upercase=range('A','Z');shuffle($upercase);
+        $lowercase=range('a','z');shuffle($lowercase);
+        $code=[$number[0],$number[1],$number[2],$number[3],$upercase[0], $lowercase[0]];
+        shuffle($code);
+        dd(implode('',$code));
+
+        $user=User::find(16);
+        $test=$user->update(['user_name'=>'tôi là tôi 1']);
+        // $user->delete();
+        dd($test);
         $v=Vouchers::find(6);
         $v->users()->sync([1,2]);
         dd('done');

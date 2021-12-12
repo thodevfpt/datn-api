@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderRequest;
 use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
 use App\Mail\VerifyOrder;
 use App\Models\AddressCustom;
+use App\Models\District;
 use App\Models\Feedbacks;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Payment;
+use App\Models\Province;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -40,6 +44,12 @@ class OrderController extends Controller
     public function paymentWithMomo(Request $request)
     {
         // validate để amount>50000
+        if ($request->amount < 50000) {
+            return response()->json([
+                'success' => false,
+                'data' => 'Giá trị thanh toán tối thiểu trên MOMO là  50000k'
+            ]);
+        }
         $amount = (int)$request->amount;
         $partnerCode = 'MOMO9NX020211127';
         $accessKey = '5h0W4SQKf3jzZxvR';
@@ -92,78 +102,177 @@ class OrderController extends Controller
     }
 
     // thêm mới order
-    public function add(Request $request)
+    public function add(OrderRequest $request)
     {
         /**
-         * i.	Lưu thông tin đơn hàng vào bảng order
-         *ii.	Lưu thông tin chi tiết đơn hàng vào bảng order_detail
-         *iii.	Lưu thông tin địa chỉ thanh toán của khách hàng vào bảng AddressCustom
-         *iv.	Tạo tk cho khách hàng
-         *v.	Gửi email thông báo đơn hàng
-         *vi.	Gửi email thông báo thông tin tk
-         *vii.	Trả về kết quả cho người dùng
-         *viii. cập nhật order_id vào bảng payments
+         *1.	Validate dl
+         *2.	Tạo tk cho kh mới nếu là kh hàng mới và chưa từng tạo tk (xét email)
+         *3.	Lưu đơn hàng
+         *4.	Lưu chi tiết đơn hàng
+         *5.	Lưu order_id vào bảng payment nếu có thanh toán online
+         *6.	Gửi mail thông báo thông tin tk  có kèm button LOGIN nếu là kh mới
+         *7.	Gửi mail thông báo đặt hàng thành công có kèm button HỦY
+         *8.	Cập nhật địa chỉ của khách hàng vào bảng address_custom
+         *9.	Trả về thông tin đơn hàng
+
 
          */
-        #1. lưu thông tin đơn hàng vào db
-        #1.1 kiểm tra đơn hàng có sp ko
-        if ($request->products) {
-            $order = new Order();
-            $order->fill($request->all());
-            $order->code_orders = time();
-            $order->save();
-            if ($order->id) {
-                # 1.2 lưu thông tin chi tiết đơn hàng vào bảng detail
-                $arr_pro_details = $request->products;
-                foreach ($arr_pro_details as $detail) {
-                    $detail['order_id'] = $order->id;
-                    $order_detail = new OrderDetail();
-                    $order_detail->fill($detail);
-                    $order_detail->save();
-                }
-                # 1.3 lưu thông tin địa chỉ của kh
-                if ($order->user_id) {
-                    $addressCustom = new AddressCustom();
-                    $addressCustom->fill($request->only(
-                        'user_id',
-                        'customer_name',
-                        'customer_email',
-                        'customer_phone',
-                        'provinceID',
-                        'districtID',
-                        'customer_address'
-                    ));
-                    $addressCustom->save();
-                }
-                # 1.4 tạo tk cho kh
+        // validate để đơn hàng có số sp >0
+        if (!$request->products) {
+            return response()->json([
+                'success' => false,
+                'data' => 'Chưa có sp nào trong đơn hàng'
+            ]);
+        }
+        # Xử lí
+        # Nếu là khách hàng mới
+        if ($request->user_id == null) {
+            #1. tạo tk
+            $user = User::where('email', $request->customer_email)->first();
+
+            if ($user == null) {
                 $user = new User();
-                $password='12345';
-                $user->password =$password ;
+                # tạo password
+                $number = range(0, 9);
+                shuffle($number);
+                $upercase = range('A', 'Z');
+                shuffle($upercase);
+                $lowercase = range('a', 'z');
+                shuffle($lowercase);
+                $password = [$number[0], $number[1], $number[2], $number[3], $upercase[0], $lowercase[0]];
+                shuffle($password);
+                $password = implode('', $password);
+                # tạo mới user
+                $user->password = $password;
                 $user->user_name = $request->customer_name;
                 $user->email = $request->customer_email;
                 $user->save();
-                # 1.5 gửi email thông báo đơn hàng
-                $data = [
-                    'data' => 'tạo đơn hàng thành công'
-                ];
-                Mail::to($request->customer_email)->later(now()->addMinutes(1), new NotifiOrder($data));
-                # 1.6 gửi email thông báo thông tin tk
+                # thêm email vào hàng đợi
                 $data = [
                     'name' => $user->user_name,
                     'password' => $password,
-                    'url' => 'login.com'
+                    'url' => 'http://localhost:3000/login'
                 ];
-                Mail::to($request->customer_email)->later(now()->addMinutes(2), new CreateAccount($data));
-                # 1.7 trả về thông tin đơn hàng cho người dùng
+                Mail::to($request->customer_email)->later(now()->addMinutes(1), new CreateAccount($data));
+            }
+            #2. Lưu đơn hàng
+            $order = new Order();
+            $order->user_id = $user->id;
+            $order->code_orders = time();
+            $province=Province::where('provinceID',$request->provinceID)->first()->provinceName;
+            $district=District::where('districtID',$request->districtID)->first()->districtName;
+            $order->customer_address=$request->customer_address.', '.$district.', Tỉnh/TP '.$province;
+            $order->fill($request->except('user_id','customer_address'));
+            $order->save();
+            #3. Lưu chi tiết đơn hàng
+            $arr_pro_details = $request->products;
+            foreach ($arr_pro_details as $detail) {
+                $detail['order_id'] = $order->id;
+                $order_detail = new OrderDetail();
+                $order_detail->fill($detail);
+                $order_detail->save();
+            }
+            #4. Cập nhật địa chỉ của khách hàng vào bảng address_custom
+            AddressCustom::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'customer_name' => $request->customer_name,
+                    'customer_email' => $request->customer_email,
+                    'customer_phone' => $request->customer_phone,
+                    'provinceID' => $request->provinceID,
+                    'districtID' => $request->districtID,
+                    'customer_address' => $request->customer_address,
+                ]
+            );
+            #5. Lưu order_id vào bảng payment nếu có thanh toán online
+            if ($request->paymentID) {
+                Payment::updateOrCreate(
+                    ['paymentID' => $request->paymentID],
+                    ['order_id' => $order->id]
+                );
+            }
+            #6. Gửi mail thông báo đặt hàng thành công
+            $data = [
+                'data' => 'tạo đơn hàng thành công'
+            ];
+            Mail::to($request->customer_email)->send((new NotifiOrder($order))->afterCommit());
+            #7. Trả về thông tin đơn hàng
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        } else {
+            # Nếu là khách hàng đã có tk
+            #2. Lưu đơn hàng
+            $order = new Order();
+            $order->code_orders = time();
+            $order->fill($request->except('customer_address'));
+            $province=Province::where('provinceID',$request->provinceID)->first()->provinceName;
+            $district=District::where('districtID',$request->districtID)->first()->districtName;
+            $order->customer_address=$request->customer_address.', '.$district.', Tỉnh/TP '.$province;
+            $order->save();
+            #3. Lưu chi tiết đơn hàng
+            $arr_pro_details = $request->products;
+            foreach ($arr_pro_details as $detail) {
+                $detail['order_id'] = $order->id;
+                $order_detail = new OrderDetail();
+                $order_detail->fill($detail);
+                $order_detail->save();
+            }
+            #4. Cập nhật địa chỉ của khách hàng vào bảng address_custom
+            AddressCustom::updateOrCreate(
+                ['user_id' => $request->user_id],
+                [
+                    'customer_name' => $request->customer_name,
+                    'customer_email' => $request->customer_email,
+                    'customer_phone' => $request->customer_phone,
+                    'provinceID' => $request->provinceID,
+                    'districtID' => $request->districtID,
+                    'customer_address' => $request->customer_address,
+                ]
+            );
+            #5. Lưu order_id vào bảng payment nếu có thanh toán online
+            if ($request->paymentID) {
+                Payment::updateOrCreate(
+                    ['paymentID' => $request->paymentID],
+                    ['order_id' => $order->id]
+                );
+            }
+            #6. Gửi mail thông báo đặt hàng thành công
+            $data = [
+                'data' => 'tạo đơn hàng thành công'
+            ];
+            Mail::to($request->customer_email)->send((new NotifiOrder($order))->afterCommit());
+            #7. Trả về thông tin đơn hàng
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+    }
+    // customer cancel order
+    public function cancelOrder(Request $request, $order_id)
+    {
+        $order = Order::find($order_id);
+        if ($order) {
+            $order = Order::where('id', $order_id)->whereIn('process_id', [1, 2, 3])->whereNull('shipper_confirm')->first();
+            if ($order) {
+                $order->update(['process_id' => 6]);
+                $order->delete();
                 return response()->json([
                     'success' => true,
-                    'data' => 'Đơn hàng tạo thành công'
+                    'data' => $order
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đơn hàng đang được giao, bạn không thể xóa đơn hàng này'
                 ]);
             }
         }
         return response()->json([
             'success' => false,
-            'data' => 'Đơn hàng chưa có sp'
+            'data' => 'Đơn hàng không tìm thấy'
         ]);
     }
     // chi tiết một đơn hàng
@@ -187,7 +296,7 @@ class OrderController extends Controller
     public function countOrderProcess()
     {
         $order = DB::table('orders')
-            ->select(DB::raw('COUNT(process_id) as count, process_id'))
+            ->select(DB::raw('COUNT(process_id) as count, process_id')) //cần thêm phần điều kiện chưa xóa mềm
             ->groupBy('process_id');
         $data = DB::table('order_processes')
             ->select('count', 'name', 'process_id')
