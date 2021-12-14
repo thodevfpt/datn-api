@@ -160,6 +160,7 @@ class CategoryController extends Controller
     {
         $categories = Category::onlyTrashed()->get();
         if ($categories->all()) {
+            $categories->load('products');
             return response()->json([
                 'success' => true,
                 'data' => $categories

@@ -15,14 +15,14 @@ class CreateConfigGhnsTable extends Migration
     {
         Schema::create('config_ghns', function (Blueprint $table) {
             $table->id();
-            $table->integer('provinceID');
+            $table->decimal('provinceID',10,0);
             $table->string('token');
             $table->integer('shopId');
             $table->integer('length');
             $table->integer('width');
             $table->integer('height');
             $table->integer('weight');
-            $table->integer('serviceId');
+            $table->decimal('serviceId',10,0);
             $table->string('service_type_id')->nullable();
             $table->integer('from_districts_id');
             $table->integer('to_districts_id');

@@ -15,6 +15,7 @@ class PaymentFactory extends Factory
     {
         return [
             'paymentID'=>rand(11111111,99999999),
+            'requestID'=>rand(11111111,99999999),
             'transID'=>rand(111111,999999),
             'amount'=>rand(50,200),
             'resultCode'=>array_rand([0,900]),

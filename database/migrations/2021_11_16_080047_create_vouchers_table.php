@@ -19,7 +19,7 @@ class CreateVouchersTable extends Migration
             $table->string('title');
             $table->tinyInteger('sale');
             $table->string('customer_type',255);
-            $table->decimal('condition',10,0);
+            $table->decimal('condition',12,0);
             $table->tinyInteger('expiration');
             $table->tinyInteger('active')->default(0);
             $table->tinyInteger('planning')->default(0);

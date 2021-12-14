@@ -323,6 +323,7 @@ class OrderController extends Controller
     {
         $model = Order::where('process_id', $process_id)->get();
         if ($model->all()) {
+            $model->load('shipper');
             return response()->json([
                 'success' => true,
                 'data' => $model
