@@ -184,14 +184,14 @@ class TransportController extends Controller
             ->post(
                 'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
                 [
-                    "from_district_id" => $config_ghn->from_districts_id,
-                    "service_id" => $config_ghn->serviceId,
-                    "service_type_id" => $config_ghn->service_type_id,
-                    "to_district_id" => $config_ghn->to_districts_id,
-                    "height" => $config_ghn->height,
-                    "length" => $config_ghn->length,
-                    "weight" => $weight,
-                    "width" => $config_ghn->width,
+                    "from_district_id" =>(int)$config_ghn->from_districts_id,
+                    "service_id" => (int)$config_ghn->serviceId,
+                    "service_type_id" => (int)$config_ghn->service_type_id,
+                    "to_district_id" => (int)$config_ghn->to_districts_id,
+                    "height" => (int)$config_ghn->height,
+                    "length" => (int)$config_ghn->length,
+                    "weight" => (int)$weight,
+                    "width" => (int)$config_ghn->width,
                     "insurance_value" => 100000
                 ]
             )['data'];
