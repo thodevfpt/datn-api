@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TestEvent;
 use App\Http\Requests\OrderRequest;
 use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
@@ -631,6 +632,7 @@ class OrderController extends Controller
     {
         if ($shop_confirm_id == 1) {
             $model = Order::where('shop_confirm', $shop_confirm_id)->get();
+            $model->load('shipper');
             if ($model->all()) {
                 return response()->json([
                     'success' => true,
@@ -643,8 +645,11 @@ class OrderController extends Controller
                 ]);
             }
         } elseif ($shop_confirm_id == 0) {
-            $model = Order::whereNull('shop_confirm')->orWhere('shop_confirm', $shop_confirm_id)->get();
+            $model = Order::where('shipper_confirm',1)->where(function($query) {
+                $query->whereNull('shop_confirm')->orWhere('shop_confirm', 0);
+            })->get();
             if ($model->all()) {
+                $model->load('shipper');
                 return response()->json([
                     'success' => true,
                     'data' => $model
@@ -723,6 +728,8 @@ class OrderController extends Controller
         foreach ($request->order_id as $id) {
             Order::find($id)->update(['shipper_confirm' => 1, 'process_id' => 4]);
         }
+        $event=new TestEvent('Đã nhận đơn hàng');
+        event($event);
         return response()->json([
             'success' => true,
             'data' => 'xác nhận thành công'
