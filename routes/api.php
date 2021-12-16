@@ -21,11 +21,13 @@ use App\Http\Controllers\TransportController;
 use App\Http\Controllers\VouchersController;
 use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
+use App\Mail\ShopCancelOrder;
 use App\Mail\test;
 use App\Mail\VerifyOrder;
 use App\Mail\VerifyOrderNew;
 use App\Models\Order;
 use FontLib\Table\Type\post;
+use Illuminate\Support\Facades\Mail;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,9 +43,18 @@ use FontLib\Table\Type\post;
 Route::get('test', [TestController::class, 'testTime']);
 Route::get('send-mail', [TestController::class, 'sendMail']);
 Route::get('test-email', function () {
-    $order = Order::find(9);
-    $order->load('voucher','order_details');
-    return new NotifiOrder($order);
+    foreach ([7,8] as $o) {
+        $model = Order::find($o);
+        $model->update(['process_id' => 6]);
+        $model->delete();
+        $data = [
+            'name' => $model->customer_name,
+            'code' => $model->code_orders
+        ];
+        Mail::to($model->customer_email)->send((new ShopCancelOrder($data))->afterCommit());
+    }
+    dd('done');
+    return new ShopCancelOrder($data);
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -58,12 +69,12 @@ Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
 Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
-// Route::prefix('admin')->group(function () {
+    // Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
     Route::middleware(['role:Admin|manager content'])->prefix('product')->group(function () {
-    // Route::prefix('product')->group(function () {
+        // Route::prefix('product')->group(function () {
         // danh sách tất cả các sp chưa bị xóa mềm
         Route::get('', [ProductController::class, 'index']);
         // filter
@@ -261,8 +272,10 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('update/cancel-delivering/array_id', [OrderController::class, 'cancelDeliveringArrayId']);
         // cập nhật ghi chú của cửa hàng cho đơn hàng
         Route::put('update/shop-note/{order_id}', [OrderController::class, 'updateShopNote']);
-        // shop hủy đơn hàng
-        Route::delete('delete/shop-cancel/{order_id}', [OrderController::class, 'shopCancelOrder']);
+        // shop hủy đơn hàng theo id
+        Route::delete('delete/shop-cancel/id/{order_id}', [OrderController::class, 'shopCancelOrderId']);
+        // shop hủy đơn hàng theo mảng id
+        Route::delete('delete/shop-cancel/array_id', [OrderController::class, 'shopCancelOrderArrayId']);
         // list đơn hàng theo trạng thái bàn giao
         Route::get('shop_confirm/{shop_confirm_id}', [OrderController::class, 'get_order_shop_confirm']);
         // xác nhận bàn giao từ nhân viên theo mảng order_id
@@ -367,8 +380,8 @@ Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    Route::post('update-account',[AuthController::class,'updateAccount'])->middleware('auth:sanctum');
-    Route::post('change-password',[AuthController::class,'changePassword'])->middleware('auth:sanctum');
+    Route::post('update-account', [AuthController::class, 'updateAccount'])->middleware('auth:sanctum');
+    Route::post('change-password', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
 });
 
 

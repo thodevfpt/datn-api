@@ -6,6 +6,7 @@ use App\Events\TestEvent;
 use App\Http\Requests\OrderRequest;
 use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
+use App\Mail\ShopCancelOrder;
 use App\Mail\VerifyOrder;
 use App\Models\AddressCustom;
 use App\Models\District;
@@ -508,13 +509,18 @@ class OrderController extends Controller
         ]);
     }
 
-    // shop cancel đơn hàng
-    public function shopCancelOrder($order_id)
+    // shop cancel đơn hàng theo id
+    public function shopCancelOrderId($order_id)
     {
         $model = Order::find($order_id);
         if ($model) {
             $model->update(['process_id' => 6]);
             $model->delete();
+            $data = [
+                'name' => $model->customer_name,
+                'code' => $model->code_orders
+            ];
+            Mail::to($model->customer_email)->send((new ShopCancelOrder($data))->afterCommit());
             return response()->json([
                 'success' => true,
                 'data' => $model
@@ -523,6 +529,30 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'data' => 'đơn hàng không tồn tại'
+        ]);
+    }
+    // shop cancel đơn hàng theo mảng id
+    public function shopCancelOrderArrayId(Request $request)
+    {
+        if ($request->order_id) {
+            foreach ($request->order_id as $o) {
+                $model = Order::find($o);
+                $model->update(['process_id' => 6]);
+                $model->delete();
+                $data = [
+                    'name' => $model->customer_name,
+                    'code' => $model->code_orders
+                ];
+                Mail::to($model->customer_email)->send((new ShopCancelOrder($data))->afterCommit());
+            }
+            return response()->json([
+                'success' => true,
+                'data' => 'hủy thành công'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'chưa có đơn hàng'
         ]);
     }
 
@@ -645,7 +675,7 @@ class OrderController extends Controller
                 ]);
             }
         } elseif ($shop_confirm_id == 0) {
-            $model = Order::where('shipper_confirm',1)->where(function($query) {
+            $model = Order::where('shipper_confirm', 1)->where(function ($query) {
                 $query->whereNull('shop_confirm')->orWhere('shop_confirm', 0);
             })->get();
             if ($model->all()) {
@@ -728,7 +758,7 @@ class OrderController extends Controller
         foreach ($request->order_id as $id) {
             Order::find($id)->update(['shipper_confirm' => 1, 'process_id' => 4]);
         }
-        $event=new TestEvent('Đã nhận đơn hàng');
+        $event = new TestEvent('Đã nhận đơn hàng');
         event($event);
         return response()->json([
             'success' => true,
