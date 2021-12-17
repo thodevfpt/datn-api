@@ -20,4 +20,8 @@ class Payment extends Model
         'orderInfo',
         'requestType',
     ];
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
 }

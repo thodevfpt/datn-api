@@ -14,6 +14,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedbacksController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\TestController;
@@ -26,6 +27,7 @@ use App\Mail\test;
 use App\Mail\VerifyOrder;
 use App\Mail\VerifyOrderNew;
 use App\Models\Order;
+use App\Models\Payment;
 use FontLib\Table\Type\post;
 use Illuminate\Support\Facades\Mail;
 
@@ -173,6 +175,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::get('classify_vouchers/all', [VouchersController::class, 'list_Classify_vouchers']);
         // active planning
         Route::post('planning/{id}', [VouchersController::class, 'planning']);
+        // unactive planning
+        Route::post('no-planning/{id}', [VouchersController::class, 'noPlanning']);
         //danh sach voucher chưa active
         Route::get('no-active', [VouchersController::class, 'NoActive']);
         //danh sach voucher đã active
@@ -336,6 +340,14 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::put('shipper-update/shop_confirm', [OrderController::class, 'shipperUpdateShopConfirm']);
         // chi tiết đơn hàng
         Route::get('{id}', [OrderController::class, 'detail']);
+    });
+    Route::middleware(['role:Admin'])->prefix('payment')->group(function () {
+        Route::get('all',[PaymentController::class,'index']);
+        Route::get('detail/{payment_id}',[PaymentController::class,'detailPayment']);
+        // xóa theo id
+        Route::delete('delete/id/{payment_id}',[PaymentController::class,'deletePaymentId']);
+        // xóa theo mảng id
+        Route::delete('delete/array_id/',[PaymentController::class,'deletePaymentArrayId']);
     });
     // API thống kê
     Route::middleware(['role:Admin'])->prefix('analytics')->group(function () {

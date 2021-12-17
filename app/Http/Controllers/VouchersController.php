@@ -52,6 +52,32 @@ class VouchersController extends Controller
             'data' => 'no data'
         ]);
     }
+     // no-active planning
+     public function noPlanning($id)
+     {
+         $voucher = Vouchers::find($id);
+         if ($voucher) {
+             $start_day = $voucher->start_day;
+             $start_day = Carbon::create($start_day);
+             $now_day = Carbon::create(Carbon::now()->toDateString());
+             if ($now_day->diffInDays($start_day) > 0) {
+                 $voucher::where('id', $voucher->id)->update(['planning' => 0]);
+                 return response()->json([
+                     'success' => true,
+                     'data' => 'un planning thành công'
+                 ]);
+             } else {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'ngày bắt đầu cần lớn hơn ngày hiện tại'
+                 ]);
+             }
+         }
+         return response()->json([
+             'success' => false,
+             'data' => 'no data'
+         ]);
+     }
     // list all voucher
     public function index()
     {
