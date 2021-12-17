@@ -322,6 +322,23 @@ class OrderController extends Controller
             'data' => 'không có đơn hàng'
         ]);
     }
+    // lấy tất cả đơn hàng đã bị xóa mềm
+    public function getDeletedAll()
+    {
+        $orders= Order::onlyTrashed()->get();
+        if ($orders->all()) {
+            $orders->load('payments','shipper','process');
+            return response()->json([
+                'success' => true,
+                'data' => $orders
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'data' => 'Chưa có đơn hàng bị xóa trong dữ liệu'
+            ]);
+        }
+    }
     // lấy tổng đơn hàng theo các trạng thái
     public function countOrderProcess()
     {
@@ -494,19 +511,19 @@ class OrderController extends Controller
     // update đơn hàng => đang giao theo mảng id
     public function updateDeliveringArrayId(Request $request)
     {
-        $total=0;
+        $total = 0;
         foreach ($request->order_id as $id) {
             $total++;
             $model = Order::find($id);
             $model->update(['shipper_id' => $request->shipper_id, 'shipper_confirm' => 0]);
         }
-        $message="Bạn có $total đơn hàng mới";
-        $user_id=$request->shipper_id;
-        $data=[
-            "message"=>$message,
-            "user_id"=>$user_id
+        $message = "Bạn có $total đơn hàng mới";
+        $user_id = $request->shipper_id;
+        $data = [
+            "message" => $message,
+            "user_id" => $user_id
         ];
-        $event=new ShipperEvent($data);
+        $event = new ShipperEvent($data);
         event($event);
         return response()->json([
             'success' => true,
@@ -749,18 +766,18 @@ class OrderController extends Controller
     // xác nhận bàn giao từ nhân viên
     public function update_shop_confirm(Request $request)
     {
-        $total=0;
+        $total = 0;
         foreach ($request->order_id as $id) {
             $total++;
             Order::find($id)->update(['shop_confirm' => 1, 'time_shop_confirm' => Carbon::now()->toDateTimeString()]);
         }
-        $message="Xác nhận $total đơn hàng thành công";
-        $user_id=$request->shipper_id;
-        $data=[
-            "message"=>$message,
-            "user_id"=>$user_id
+        $message = "Xác nhận $total đơn hàng thành công";
+        $user_id = $request->shipper_id;
+        $data = [
+            "message" => $message,
+            "user_id" => $user_id
         ];
-        $event=new ShipperEvent($data);
+        $event = new ShipperEvent($data);
         event($event);
         return response()->json([
             'success' => true,
@@ -783,7 +800,40 @@ class OrderController extends Controller
             'data' => 'xóa thành công'
         ]);
     }
-
+    // xóa vĩnh viễn đơn hàng đã lưu trữ theo id
+    public function forceDeleteOrderId($order_id)
+    {
+        $order = Order::withTrashed()->find($order_id);
+        if ($order) {
+            $order->forceDelete();
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'đơn hàng ko tồn tại'
+        ]);
+    }
+    // xóa vĩnh viễn đơn hàng đã lưu trữ theo mảng id
+    public function forceDeleteOrderArrayId($order_id)
+    {
+        if ($order_id) {
+            foreach ($order_id as $o) {
+                $order = Order::withTrashed()->where('id', $o)->first();
+                $order->forceDelete();
+            }
+            return response()->json([
+                'success' => true,
+                'data' => 'xóa thành công'
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'mảng rỗng'
+        ]);
+    }
     // cập nhật trạng thái cho các đơn hàng tiếp tục xử lí
     public function updateNewProcess(Request $request)
     {
@@ -849,15 +899,15 @@ class OrderController extends Controller
     // xác nhận đã nhận đơn hàng theo mảng order_id
     public function updateShipperConfirm(Request $request)
     {
-        $user_name=$request->user()->user_name;
-        $total=0;
+        $user_name = $request->user()->user_name;
+        $total = 0;
         foreach ($request->order_id as $id) {
             $total++;
             Order::find($id)->update(['shipper_confirm' => 1, 'process_id' => 4]);
         }
-        $message="Nhân viên $user_name đã nhận $total đơn hàng";
-        $data=[
-            "message"=>$message,
+        $message = "Nhân viên $user_name đã nhận $total đơn hàng";
+        $data = [
+            "message" => $message,
         ];
         $event = new ShopEvent($data);
         event($event);
@@ -950,15 +1000,15 @@ class OrderController extends Controller
     // gửi yêu cầu bàn giao đơn hàng theo mảng order_id
     public function shipperUpdateShopConfirm(Request $request)
     {
-        $user_name=$request->user()->user_name;
-        $total=0;
+        $user_name = $request->user()->user_name;
+        $total = 0;
         foreach ($request->order_id as $id) {
             $total++;
             Order::find($id)->update(['shop_confirm' => 0]);
         }
-        $message="Nhân viên $user_name gửi yêu cầu bàn giao $total đơn hàng";
-        $data=[
-            "message"=>$message,
+        $message = "Nhân viên $user_name gửi yêu cầu bàn giao $total đơn hàng";
+        $data = [
+            "message" => $message,
         ];
         $event = new ShopEvent($data);
         event($event);

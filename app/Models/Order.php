@@ -61,7 +61,6 @@ class Order extends Model
         return $this->belongsTo(OrderProcess::class, 'process_id');
     }
 
-
     //    lấy thông tin từ bảng feedback
     public function feedback()
     {

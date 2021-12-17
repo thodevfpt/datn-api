@@ -253,6 +253,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         // Route::prefix('order')->group(function () {
         // lấy tất cả đơn hàng chưa bị xóa mềm
         Route::get('process/9', [OrderController::class, 'getAllOrder']);
+        // lấy tất cả đơn hàng đã bị xóa mềm
+        Route::get('deleted/all',[OrderController::class,'getDeletedAll']);
         // lấy tổng đơn hàng theo trạng thái
         Route::get('count-process', [OrderController::class, 'countOrderProcess']);
         // list đơn hàng theo trạng thái
@@ -293,8 +295,12 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::get(('count-shop-confirm'), [OrderController::class, 'countShopConfirm']);
         // xác nhận bàn giao từ nhân viên theo mảng order_id
         Route::put('update/shop_confirm', [OrderController::class, 'update_shop_confirm']);
-        // xóa mềm các đơn hàng theo mảng order_id
+        // xóa mềm các đơn hàng theo mảng order_id => chưa xong
         Route::delete('delete/array_id', [OrderController::class, 'deleteOrder']);
+        // xóa vĩnh viễn một đơn hàng theo id
+        Route::delete('force-delete/id/{order_id}',[OrderController::class,'forceDeleteOrderId']);
+        // xóa vĩnh viễn một đơn hàng theo mảng id
+        Route::delete('force-delete/array_id',[OrderController::class,'forceDeleteOrderArrayId']);
         // cập nhật trạng thái cho những đơn hàng tiếp tục xử lí
         Route::put('update/new-process/array_id', [OrderController::class, 'updateNewProcess']);
         // xuất hóa đơn PDF
