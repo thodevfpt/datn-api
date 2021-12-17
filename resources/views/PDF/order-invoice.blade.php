@@ -461,22 +461,23 @@
 </head>
 
 <body>
+@dump($order)
   @php
-  $date=date_format(date_create($order->created_at) ,"d-m-Y H:i:s");
+  $date=date_format(date_create($order['created_at']) ,"d-m-Y H:i:s");
   $total=0;
-  foreach($order->order_details as $p){
-  $total+= $p->standard_price*$p->quantity;
+  foreach($order['order_details'] as $p){
+  $total+= $p['standard_price']*$p['quantity'];
   }
   $sale=0;
-  if($order->voucher){
-    if($order->voucher->classify_voucher_id==3){
-      $sale=$order->transportation_costs;
+  if($order['voucher']){
+    if($order['voucher']['classify_voucher_id']==3){
+      $sale=$order['transportation_costs'];
     }else{
-      $sale=$order->voucher->sale*$total/100;
+      $sale=$order['voucher']['sale']*$total/100;
     }
   
   }
-  $pay=$total+$order->transportation_costs-$sale;
+  $pay=$total+$order['transportation_costs']-$sale;
   @endphp
   <section class="section-all bill">
     <div class="container">
@@ -486,7 +487,7 @@
         </div>
         <div class="header__mail">
           <div class="tt_mail">
-            <span class="d-block">Mã đơn hàng: <b>{{$order->code_orders}}</b></span>
+            <span class="d-block">Mã đơn hàng: <b>{{$order['code_orders']}}</b></span>
             <span class="d-block">Ngày tạo: <b>{{$date}}</b></span>
           </div>
         </div>
@@ -499,11 +500,11 @@
             </div>
 
             <div class="text-95 text-secondary-d3">
-              @foreach($order->order_details as $p)
+              @foreach($order['order_details'] as $p)
               <div class="row mb-sm-0 py-3 bt_1">
-                <div class="col-lg-5 col-md-5 col-5 text-center d-block fz-mb-1">{{$p->standard_name}}</div>
-                <div class="col-lg-3 col-md-3 col-3 text-center d-block fz-mb-1">{{$p->quantity}}</div>
-                <div class="col-lg-4 col-md-4 col-4 text-center d-block fz-mb-1 text-secondary-d2 ">{{$p->standard_price}} đ</div>
+                <div class="col-lg-5 col-md-5 col-5 text-center d-block fz-mb-1">{{$p['standard_name']}}</div>
+                <div class="col-lg-3 col-md-3 col-3 text-center d-block fz-mb-1">{{$p['quantity']}}</div>
+                <div class="col-lg-4 col-md-4 col-4 text-center d-block fz-mb-1 text-secondary-d2 ">{{$p['standard_price']}} đ</div>
               </div>
               @endforeach
             </div>
@@ -521,12 +522,12 @@
                   Giá cước:
                 </div>
                 <div class="col-lg-4 col-md-4 col-4">
-                  <span class="text-120 text-center d-block fz-mb">{{$order->transportation_costs}} đ</span>
+                  <span class="text-120 text-center d-block fz-mb">{{$order['transportation_costs']}} đ</span>
                 </div>
               </div>
               <div class="row mb-sm-0 py-3 bt_1">
                 <div class="col-lg-8 col-md-8 col-8 fz-mb">
-                  Khuyến mãi: @if($order->voucher) {{$order->voucher->title}} @else @endif
+                  Khuyến mãi: @if($order['voucher']) {{$order['voucher']['title']}} @else @endif
                 </div>
                 <div class="col-lg-4 col-md-4 col-4">
                   <span class="text-110 text-center d-block fz-mb">@if($sale) -{{$sale}} @else 0 @endif đ</span>
@@ -545,7 +546,7 @@
                   Phương thức thanh toán:
                 </div>
                 <div class="col-lg-4 col-md-4 col-4">
-                  <span class="text-110 text-center d-block fz-mb">@if($order->payments==1) MOMO @else COD @endif</span>
+                  <span class="text-110 text-center d-block fz-mb">@if($order['payments']==1) MOMO @else COD @endif</span>
                 </div>
               </div>
             </div>
@@ -554,9 +555,9 @@
             <p class="text-150 fz-mb">Thông tin khách hàng</p>
             <div class="row pt-3">
               <div class="col-lg-6 ">
-                <p class="fz-mb">Tên khách hàng: <b>{{$order->customer_name}} </b></p>
-                <p class="fz-mb">Số điện thoại: <b>{{$order->customer_phone}} </b></p>
-                <p class="fz-mb">Địa chỉ: <b>{{$order->customer_address}} </b></p>
+                <p class="fz-mb">Tên khách hàng: <b>{{$order['customer_name']}} </b></p>
+                <p class="fz-mb">Số điện thoại: <b>{{$order['customer_phone']}} </b></p>
+                <p class="fz-mb">Địa chỉ: <b>{{$order['customer_address']}} </b></p>
               </div>
             </div>
           </div>

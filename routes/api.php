@@ -43,7 +43,15 @@ use Illuminate\Support\Facades\Mail;
 Route::get('test', [TestController::class, 'testTime']);
 Route::get('send-mail', [TestController::class, 'sendMail']);
 Route::get('test-email', function () {
-    foreach ([7,8] as $o) {
+    $order = Order::find(1);
+    $order->load('order_details', 'voucher');
+    // dd($order);
+    // return response()->json([
+    //     'success' => true,
+    //     'data' => $order
+    // ]);
+    return new NotifiOrder($order);
+    foreach ([7, 8] as $o) {
         $model = Order::find($o);
         $model->update(['process_id' => 6]);
         $model->delete();
@@ -242,6 +250,9 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
     });
 
     Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
+        // Route::prefix('order')->group(function () {
+        // lấy tất cả đơn hàng chưa bị xóa mềm
+        Route::get('get/all', [OrderController::class, 'getAllOrder']);
         // lấy tổng đơn hàng theo trạng thái
         Route::get('count-process', [OrderController::class, 'countOrderProcess']);
         // list đơn hàng theo trạng thái
@@ -284,7 +295,10 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::delete('delete/array_id', [OrderController::class, 'deleteOrder']);
         // cập nhật trạng thái cho những đơn hàng tiếp tục xử lí
         Route::put('update/new-process/array_id', [OrderController::class, 'updateNewProcess']);
-
+        // xuất hóa đơn PDF
+        Route::get('export/invoice/{order_id}', [OrderController::class, 'ExportInvoice']);
+        // back lại trạng thái theo order_id
+        Route::put('backup/process/{order_id}', [OrderController::class, 'backupProcessOrder']);
 
 
 

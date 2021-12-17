@@ -18,6 +18,7 @@ use App\Models\Province;
 use App\Models\User;
 use App\Models\Voucher_users;
 use App\Models\Vouchers;
+use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -287,6 +288,7 @@ class OrderController extends Controller
             'data' => 'Đơn hàng không tìm thấy'
         ]);
     }
+
     // chi tiết một đơn hàng
     public function detail($id)
     {
@@ -303,12 +305,28 @@ class OrderController extends Controller
             'data' => 'đơn hàng không tồn tại'
         ]);
     }
-
+// lấy tất cả đơn hàng chưa bị xóa mềm
+public function getAllOrder()
+{
+   $orders=Order::all();
+   if($orders->all()){
+       $orders->load('shipper','process');
+    return response()->json([
+        'success' => true,
+        'data' => $orders
+    ]);
+   }
+   return response()->json([
+    'success' => false,
+    'data' => 'không có đơn hàng'
+]);
+}
     // lấy tổng đơn hàng theo các trạng thái
     public function countOrderProcess()
     {
         $order = DB::table('orders')
-            ->select(DB::raw('COUNT(process_id) as count, process_id')) //cần thêm phần điều kiện chưa xóa mềm
+            ->select(DB::raw('COUNT(process_id) as count, process_id'))
+            ->whereNull('deleted_at')
             ->groupBy('process_id');
         $data = DB::table('order_processes')
             ->select('count', 'name', 'process_id')
@@ -732,7 +750,38 @@ class OrderController extends Controller
             'data' => 'cập nhật trạng thái cho mới cho các đơn hàng thành công'
         ]);
     }
-
+    // xuất hóa đơn PDF => chưa được
+    public function ExportInvoice($order_id)
+    {
+        $order = Order::find($order_id);
+        if ($order) {
+            $order->load('order_details', 'voucher');
+            $order = $order->toArray();
+            // $pdf = PDF::loadView('PDF.order-invoice', ['order' => $order]);
+            $pdf = PDF::loadView('PDF.order-invoice1',['name'=>'thọ','age'=>20]);
+            return $pdf->download('abc.pdf');
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'no data'
+        ]);
+    }
+    // backup lại trạng thái đơn hàng theo order_id
+    public function backupProcessOrder($order_id)
+    {
+        $order=Order::where('id',$order_id)->whereNull('shipper_confirm')->whereIn('process_id',[2,3])->first();
+        if($order){
+            $order->update(['process_id'=>$order->process_id-1]);
+            return response()->json([
+                'success' => true,
+                'data' => $order
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'no data'
+        ]);
+    }
 
     ################### API dành cho nhân viên ###############################
 
