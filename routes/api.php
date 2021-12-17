@@ -76,8 +76,8 @@ Route::get('setup_transport', [TransportController::class, 'resetTransport']);
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
-Route::prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
+    // Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
@@ -249,10 +249,10 @@ Route::prefix('admin')->group(function () {
         });
     });
 
-    // Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
-    Route::prefix('order')->group(function () {
+    Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
+        // Route::prefix('order')->group(function () {
         // lấy tất cả đơn hàng chưa bị xóa mềm
-        Route::get('get/all', [OrderController::class, 'getAllOrder']);
+        Route::get('process/9', [OrderController::class, 'getAllOrder']);
         // lấy tổng đơn hàng theo trạng thái
         Route::get('count-process', [OrderController::class, 'countOrderProcess']);
         // list đơn hàng theo trạng thái
@@ -309,8 +309,8 @@ Route::prefix('admin')->group(function () {
         // chi tiết một đơn hàng
         Route::get('{id}', [OrderController::class, 'detail']);
     });
-    // Route::middleware(['role:Admin|shipper'])->prefix('order')->group(function () {
-    Route::prefix('order')->group(function () {
+    Route::middleware(['role:Admin|shipper'])->prefix('order')->group(function () {
+        // Route::prefix('order')->group(function () {
         ############### API dành cho nhân viên shiiper #################
         // 1. list đơn hàng của nhân viên theo trạng thái chưa xác nhận
         Route::get('shipper/no-confirm/{shipper_id}', [OrderController::class, 'shipperOrderNoConfirm']);
