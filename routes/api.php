@@ -76,8 +76,8 @@ Route::get('setup_transport', [TransportController::class, 'resetTransport']);
 Route::get('setup_role_permission', [PermissionController::class, 'run']);
 
 // các API của admin
-Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
-    // Route::prefix('admin')->group(function () {
+// Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|manager comment|manager user|shipper'])->prefix('admin')->group(function () {
+Route::prefix('admin')->group(function () {
     Route::get('', function () {
         echo 'Bạn được phép truy cập trang admin';
     });
@@ -249,8 +249,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         });
     });
 
-    Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
-        // Route::prefix('order')->group(function () {
+    // Route::middleware(['role:Admin|manager order'])->prefix('order')->group(function () {
+    Route::prefix('order')->group(function () {
         // lấy tất cả đơn hàng chưa bị xóa mềm
         Route::get('get/all', [OrderController::class, 'getAllOrder']);
         // lấy tổng đơn hàng theo trạng thái
@@ -289,6 +289,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::delete('delete/shop-cancel/array_id', [OrderController::class, 'shopCancelOrderArrayId']);
         // list đơn hàng theo trạng thái bàn giao
         Route::get('shop_confirm/{shop_confirm_id}', [OrderController::class, 'get_order_shop_confirm']);
+        // lấy tổng đơn hàng theo trạng thái bàn giao
+        Route::get(('count-shop-confirm'), [OrderController::class, 'countShopConfirm']);
         // xác nhận bàn giao từ nhân viên theo mảng order_id
         Route::put('update/shop_confirm', [OrderController::class, 'update_shop_confirm']);
         // xóa mềm các đơn hàng theo mảng order_id
@@ -307,7 +309,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         // chi tiết một đơn hàng
         Route::get('{id}', [OrderController::class, 'detail']);
     });
-    Route::middleware(['role:Admin|shipper'])->prefix('order')->group(function () {
+    // Route::middleware(['role:Admin|shipper'])->prefix('order')->group(function () {
+    Route::prefix('order')->group(function () {
         ############### API dành cho nhân viên shiiper #################
         // 1. list đơn hàng của nhân viên theo trạng thái chưa xác nhận
         Route::get('shipper/no-confirm/{shipper_id}', [OrderController::class, 'shipperOrderNoConfirm']);
@@ -317,6 +320,8 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::get('shipper/delivering/no-shop-confirm/{shipper_id}', [OrderController::class, 'shipperDelivering']);
         // 3. list đơn hàng của nhân viên đã nhận nhưng chưa hoàn thành việc bàn giao
         Route::get('shipper/shipper-confirm/no-shop-confirm/{shipper_id}', [OrderController::class, 'shipperConfirmNoShopCOnfirm']);
+        // tổng đơn hàng theo các trạng thái của shipper
+        Route::get('count-mix-process/{shipper_id}', [OrderController::class, 'countMixProcess']);
         // cập nhật trạng thái hoàn thành cho đơn hàng theo id
         Route::put('update/success-order/{order_id}', [OrderController::class, 'updateSuccessOrder']);
         // cập nhật trạng thái hủy cho đơn hàng theo id

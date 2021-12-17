@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TestEvent;
+use App\Events\ShopEvent;
 use App\Http\Requests\OrderRequest;
 use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
@@ -710,7 +710,25 @@ public function getAllOrder()
             }
         }
     }
-
+    // đếm số đơn hàng theo trạng thái bàn giao
+    public function countShopConfirm()
+    {
+        $shop_confirm = Order::select(DB::raw('COUNT(*) as count'))->where('shop_confirm', 1)->first();
+        $shop_confirm= $shop_confirm->count;
+        $shop_no_confirm = Order::select(DB::raw('COUNT(*) as count'))->where('shipper_confirm', 1)->where(function ($query) {
+            $query->whereNull('shop_confirm')->orWhere('shop_confirm', 0);
+        })->first();
+        $shop_no_confirm= $shop_no_confirm->count;
+        $data=[
+            'shop_confirm'=>$shop_confirm,
+            'shop_no_confirm'=>$shop_no_confirm
+        ];
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+        dd($shop_confirm);
+    }
     // xác nhận bàn giao từ nhân viên
     public function update_shop_confirm(Request $request)
     {
@@ -807,7 +825,7 @@ public function getAllOrder()
         foreach ($request->order_id as $id) {
             Order::find($id)->update(['shipper_confirm' => 1, 'process_id' => 4]);
         }
-        $event = new TestEvent('Đã nhận đơn hàng');
+        $event = new ShopEvent('Đã nhận đơn hàng');
         event($event);
         return response()->json([
             'success' => true,
@@ -846,6 +864,35 @@ public function getAllOrder()
         return response()->json([
             'success' => false,
             'data' => 'ko có đơn hàng nào đang giao'
+        ]);
+    }
+    // list tổng đơn hàng theo trạng thái
+    public function countMixProcess($shipper_id)
+    {
+        $order_new=Order::select(DB::raw('COUNT(*) as count'))->where('shipper_id', $shipper_id)->where('shipper_confirm', 0)->first();
+        $order_new=$order_new->count;
+        $order_delivering=Order::select(DB::raw('COUNT(*) as count'))
+        ->where('shipper_id', $shipper_id)
+        ->where('process_id', 4)
+        ->where(function ($query) {
+            $query->whereNull('shop_confirm')->orWhere('shop_confirm', 0);
+        })->first();
+        $order_delivering=$order_delivering->count;
+        $order_shop_no_confirm=Order::select(DB::raw('COUNT(*) as count'))
+        ->where('shipper_id', $shipper_id)
+        ->where('shipper_confirm', 1)
+        ->where(function ($query) {
+            $query->whereNull('shop_confirm')->orWhere('shop_confirm', 0);
+        })->first();
+        $order_shop_no_confirm=$order_shop_no_confirm->count;
+        $data=[
+            'order_new'=>$order_new,
+            'order_delivering'=>$order_delivering,
+            'order_shop_no_confirm'=>$order_shop_no_confirm
+        ];
+        return response()->json([
+            'success' => true,
+            'data' => $data
         ]);
     }
     // cập nhật trạng thái thành công cho đơn hàng theo id

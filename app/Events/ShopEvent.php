@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TestEvent implements ShouldBroadcast
+class ShopEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public $message;
@@ -35,6 +35,6 @@ class TestEvent implements ShouldBroadcast
     }
     public function broadcastAs()
     {
-        return 'Test-Event';
+        return 'ShopEvent';
     }
 }
