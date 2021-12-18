@@ -26,6 +26,11 @@
       margin-top: 20px;
       color: #484b51;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #e9f6ff;
+    }
+
+    .bg-w {
+      background: #fff;
     }
 
     .bill .text-secondary-d1 {
@@ -457,6 +462,29 @@
         font-size: 12px;
       }
     }
+
+    .section-all {
+      padding-bottom: 3rem;
+    }
+
+    .btn_ {
+      margin: 10px 0;
+      text-align: center;
+
+    }
+
+    .btn_ a {
+      background: red;
+      color: white;
+      text-decoration: none;
+      /* padding: 10px 0; */
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .mt-3 {
+      margin-top: 2rem;
+    }
   </style>
 </head>
 
@@ -469,18 +497,18 @@
   }
   $sale=0;
   if($order->voucher){
-    if($order->voucher->classify_voucher_id==3){
-      $sale=$order->transportation_costs;
-    }else{
-      $sale=$order->voucher->sale*$total/100;
-    }
-  
+  if($order->voucher->classify_voucher_id==3){
+  $sale=$order->transportation_costs;
+  }else{
+  $sale=$order->voucher->sale*$total/100;
+  }
+
   }
   $pay=$total+$order->transportation_costs-$sale;
   @endphp
   <section class="section-all bill">
     <div class="container">
-      <div class="col-lg-6 m-auto bd-m p-0">
+    <div class="col-lg-6 m-auto bd-m p-0 bg-w mb-3">
         <div class="header_mail">
           <span style="text-align: center;" class="text-150 text-white">Đơn hàng mới của khách hàng</span>
         </div>
@@ -561,6 +589,11 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="btn_ mt-3">
+        <a href="">
+          Hủy đơn hàng
+        </a>
       </div>
     </div>
   </section>

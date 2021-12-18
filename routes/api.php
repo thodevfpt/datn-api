@@ -49,24 +49,19 @@ Route::get('send-mail', [TestController::class, 'sendMail']);
 Route::get('test-email', function () {
     $order = Order::find(1);
     $order->load('order_details', 'voucher');
-    // dd($order);
-    // return response()->json([
-    //     'success' => true,
-    //     'data' => $order
-    // ]);
     return new NotifiOrder($order);
-    foreach ([7, 8] as $o) {
-        $model = Order::find($o);
-        $model->update(['process_id' => 6]);
-        $model->delete();
-        $data = [
-            'name' => $model->customer_name,
-            'code' => $model->code_orders
-        ];
-        Mail::to($model->customer_email)->send((new ShopCancelOrder($data))->afterCommit());
-    }
-    dd('done');
-    return new ShopCancelOrder($data);
+    // foreach ([7, 8] as $o) {
+    //     $model = Order::find($o);
+    //     $model->update(['process_id' => 6]);
+    //     $model->delete();
+    //     $data = [
+    //         'name' => $model->customer_name,
+    //         'code' => $model->code_orders
+    //     ];
+    //     Mail::to($model->customer_email)->send((new ShopCancelOrder($data))->afterCommit());
+    // }
+    // dd('done');
+    // return new ShopCancelOrder($data);
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -442,7 +437,7 @@ Route::prefix('order')->group(function () {
     // add order
     Route::post('add', [OrderController::class, 'add']);
     // cancel order
-    Route::post('cancel/{order_id}', [OrderController::class, 'cancelOrder']);
+    Route::put('cancel/{order_id}', [OrderController::class, 'cancelOrder']);
     // list order chưa bị xóa mềm
     Route::get('all', [OrderController::class, 'index']);
     // list 1 order theo user_id

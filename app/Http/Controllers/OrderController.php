@@ -273,9 +273,17 @@ class OrderController extends Controller
             if ($order) {
                 $order->update(['process_id' => 6]);
                 $order->delete();
+
+                $code_order = $order->code_orders;
+                $message = "Khách hàng đã hủy đơn hàng $code_order";
+                $data = [
+                    "message" => $message,
+                ];
+                $event = new ShopEvent($data);
+                event($event);
                 return response()->json([
                     'success' => true,
-                    'data' => $order
+                    'data' => $order->code_orders
                 ]);
             } else {
                 return response()->json([
@@ -325,9 +333,9 @@ class OrderController extends Controller
     // lấy tất cả đơn hàng đã bị xóa mềm
     public function getDeletedAll()
     {
-        $orders= Order::onlyTrashed()->get();
+        $orders = Order::onlyTrashed()->get();
         if ($orders->all()) {
-            $orders->load('payments','shipper','process');
+            $orders->load('payments', 'shipper', 'process');
             return response()->json([
                 'success' => true,
                 'data' => $orders
@@ -771,7 +779,7 @@ class OrderController extends Controller
             $total++;
             Order::find($id)->update(['shop_confirm' => 1, 'time_shop_confirm' => Carbon::now()->toDateTimeString()]);
         }
-        $shipper_id=Order::find($request->order_id[0])->shipper_id;
+        $shipper_id = Order::find($request->order_id[0])->shipper_id;
         $message = "Xác nhận $total đơn hàng thành công";
         $user_id = $shipper_id;
         $data = [
