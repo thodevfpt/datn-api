@@ -582,7 +582,7 @@
             <p class="text-150 fz-mb">Thông tin khách hàng</p>
             <div class="row pt-3">
               <div class="col-lg-6 ">
-                <p class="fz-mb">Tên khách hàng: <b>{{$order->customer_name}} </b></p>
+                <p style="text-transform: capitalize;" class="fz-mb">Tên khách hàng: <b>{{$order->customer_name}} </b></p>
                 <p class="fz-mb">Số điện thoại: <b>{{$order->customer_phone}} </b></p>
                 <p class="fz-mb">Địa chỉ: <b>{{$order->customer_address}} </b></p>
               </div>

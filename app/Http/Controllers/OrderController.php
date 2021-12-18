@@ -53,7 +53,7 @@ class OrderController extends Controller
         if ($request->amount < 50000) {
             return response()->json([
                 'success' => false,
-                'data' => 'Giá trị thanh toán tối thiểu trên MOMO là  50000k'
+                'data' => 'Giá trị thanh toán tối thiểu trên MOMO là  50000'
             ]);
         }
         $amount = (int)$request->amount;
@@ -171,6 +171,7 @@ class OrderController extends Controller
             $order->customer_address = $request->customer_address . ', ' . $district . ', Tỉnh/TP ' . $province;
             $order->fill($request->except('user_id', 'customer_address'));
             $order->save();
+            $order->load('order_details', 'voucher');
             #3. Lưu chi tiết đơn hàng
             $arr_pro_details = $request->products;
             foreach ($arr_pro_details as $detail) {
@@ -192,16 +193,23 @@ class OrderController extends Controller
                 ]
             );
             #5. Lưu order_id vào bảng payment nếu có thanh toán online
-            // if ($request->paymentID) {
-            //     Payment::updateOrCreate(
-            //         ['paymentID' => $request->paymentID],
-            //         ['order_id' => $order->id]
-            //     );
-            // }
+            if ($request->paymentID) {
+                Payment::updateOrCreate(
+                    ['paymentID' => $request->paymentID],
+                    [
+                        'order_id' => $order->id,
+                        'paymentID' => $request->paymentID,
+                        'requestID' => $request->requestID,
+                        'transID' => $request->transID,
+                        'amount' => $request->amount,
+                        'resultCode' => $request->resultCode,
+                        'message' => $request->message,
+                        'payType' => $request->payType,
+                        'orderInfo' => $request->orderInfo,
+                    ]
+                );
+            }
             #6. Gửi mail thông báo đặt hàng thành công
-            $data = [
-                'data' => 'tạo đơn hàng thành công'
-            ];
             Mail::to($request->customer_email)->send((new NotifiOrder($order))->afterCommit());
             #7. Trả về thông tin đơn hàng
             return response()->json([
@@ -218,6 +226,7 @@ class OrderController extends Controller
             $district = District::where('districtID', $request->districtID)->first()->districtName;
             $order->customer_address = $request->customer_address . ', ' . $district . ', Tỉnh/TP ' . $province;
             $order->save();
+            $order->load('order_details', 'voucher');
             #3. Lưu chi tiết đơn hàng
             $arr_pro_details = $request->products;
             foreach ($arr_pro_details as $detail) {
@@ -239,16 +248,23 @@ class OrderController extends Controller
                 ]
             );
             #5. Lưu order_id vào bảng payment nếu có thanh toán online
-            // if ($request->paymentID) {
-            //     Payment::updateOrCreate(
-            //         ['paymentID' => $request->paymentID],
-            //         ['order_id' => $order->id]
-            //     );
-            // }
+            if ($request->paymentID) {
+                Payment::updateOrCreate(
+                    ['paymentID' => $request->paymentID],
+                    [
+                        'order_id' => $order->id,
+                        'paymentID' => $request->paymentID,
+                        'requestID' => $request->requestID,
+                        'transID' => $request->transId,
+                        'amount' => $request->amount,
+                        'resultCode' => $request->resultCode,
+                        'message' => $request->message,
+                        'payType' => $request->payType,
+                        'orderInfo' => $request->orderInfo,
+                    ]
+                );
+            }
             #6. Gửi mail thông báo đặt hàng thành công
-            $data = [
-                'data' => 'tạo đơn hàng thành công'
-            ];
             Mail::to($request->customer_email)->send((new NotifiOrder($order))->afterCommit());
             #7  Xóa những voucher chỉ sử dụng một lần nếu có
             if ($request->voucher_id) {

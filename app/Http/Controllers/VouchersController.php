@@ -162,7 +162,7 @@ class VouchersController extends Controller
     // show voucher
     public function show($id)
     {
-        $voucher = Vouchers::query()->find($id);
+        $voucher = Vouchers::withTrashed()->find($id);
         if ($voucher) {
             return response()->json([
                 'success' => true,

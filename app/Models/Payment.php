@@ -12,6 +12,7 @@ class Payment extends Model
     public $fillable=[
         'order_id',
         'paymentID',
+        'requestID',
         'transID',
         'amount',
         'resultCode',
