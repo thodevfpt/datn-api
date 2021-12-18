@@ -771,8 +771,9 @@ class OrderController extends Controller
             $total++;
             Order::find($id)->update(['shop_confirm' => 1, 'time_shop_confirm' => Carbon::now()->toDateTimeString()]);
         }
+        $shipper_id=Order::find($request->order_id[0])->shipper_id;
         $message = "Xác nhận $total đơn hàng thành công";
-        $user_id = $request->shipper_id;
+        $user_id = $shipper_id;
         $data = [
             "message" => $message,
             "user_id" => $user_id

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AnalyticRevenueExport;
 use App\Mail\CreateAccount;
 use App\Mail\NotifiOrder;
 use App\Mail\VerifyOrder;
@@ -14,74 +15,221 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TestController extends Controller
 {
+    public function demo(Request $request)
+    {
+        $day = $request->day;
+        $month = $request->month;
+        $year = $request->year;
+        $time = Carbon::create($day)->toDateString();
+        if ($day) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($time) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereDate('orders.time_shop_confirm', $time)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $data['name'][] = $m->standard_name;
+                    $data['value'][] = $m->sum;
+                }
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+
+                //  foreach ($model as $m) {
+                //     $dl = [
+                //         'name' => $m->standard_name,
+                //         'value' => $m->sum
+                //     ];
+                //     $data[] = $dl;
+                // }
+                // return Excel::download(new AnalyticRevenueExport($data), 'thong-ke-doanh-thu.xlsx');
+                
+            }
+        } elseif ($month && $year) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($month, $year) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereYear('time_shop_confirm', $year)
+                        ->whereMonth('time_shop_confirm', $month)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $data['name'][] = $m->standard_name;
+                    $data['value'][] = $m->sum;
+                }
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+            }
+        } elseif ($year) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($year) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereYear('time_shop_confirm', $year)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $data['name'][] = $m->standard_name;
+                    $data['value'][] = $m->sum;
+                }
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+            }
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'no data'
+        ]);
+    }
     public function sendMail()
     {
-        $data=[
-            'notifi'=>'tạo đơn hàng thành công'
+        $data = [
+            'notifi' => 'tạo đơn hàng thành công'
         ];
         Mail::to('thonvps09672@fpt.edu.vn')->queue(new NotifiOrder($data));
         dd('done');
-        $user=new User();
-        $user->password='12345';
-        $user->user_name='thọ nguyễn';
-        $user->email='thonvps09672@fpt.edu.vn';
+        $user = new User();
+        $user->password = '12345';
+        $user->user_name = 'thọ nguyễn';
+        $user->email = 'thonvps09672@fpt.edu.vn';
         $user->save();
         # 1.5 gửi email thông báo đơn hàng
-        $data=[
-            'name'=>$user->user_name,
-            'password'=>$user->password,
-            'url'=>'login.com'
+        $data = [
+            'name' => $user->user_name,
+            'password' => $user->password,
+            'url' => 'login.com'
         ];
         Mail::to($user->email)->later(now()->addMinutes(1), new CreateAccount($data));
         dd('done');
         // ////////////////////////
-        $to_email='thonvps09672@fpt.edu.vn';
-        $data=[
-            'code'=>'12345',
-            'name'=>'thọ đẹp trai'
+        $to_email = 'thonvps09672@fpt.edu.vn';
+        $data = [
+            'code' => '12345',
+            'name' => 'thọ đẹp trai'
         ];
         Mail::to($to_email)->send((new VerifyOrder($data)));
         dd('send mail success');
     }
     public function testTime(Request $request)
     {
-        $number=range(0,9); shuffle($number);
-        $upercase=range('A','Z');shuffle($upercase);
-        $lowercase=range('a','z');shuffle($lowercase);
-        $code=[$number[0],$number[1],$number[2],$number[3],$upercase[0], $lowercase[0]];
-        shuffle($code);
-        dd(implode('',$code));
 
-        $user=User::find(16);
-        $test=$user->update(['user_name'=>'tôi là tôi 1']);
+
+
+        // $time = Carbon::create($day)->toDateString();
+        // $order_details = DB::table('order_details')
+        //     ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name,order_id'))
+        //     ->groupBy('product_id', 'standard_name', 'order_id');
+        // $model = DB::table('orders')
+        //     ->select('sum', 'product_id', 'standard_name', 'order_id')
+        //     ->joinSub($order_details, 'op', function ($join) use ($time) {
+        //         $join->on('orders.id', '=', 'op.order_id')
+        //             ->where('process_id', 5)
+        //             ->whereDate('orders.time_shop_confirm', $time);
+        //     })
+        //     ->get();
+        // foreach ($model as $m) {
+        //     $data['name'][] = $m->standard_name;
+        //     $data['value'][] = $m->sum;
+        // }
+        // return response()->json([
+        //     'success' => true,
+        //     'data' => $model
+        // ]);
+
+        $order_details = DB::table('order_details')
+            ->select(DB::raw('SUM(quantity) as sum, product_id'))
+            ->groupBy('product_id');
+        $data = DB::table('orders')
+            ->select('sum', 'product_id')
+            ->joinSub($order_details, 'op', function ($join) {
+                $date = '2021-11-10';
+                $join->on('orders.id', '=', 'op.product_id')
+                    ->whereDate('orders.created_at', $date);
+            })
+            ->get();
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+
+
+        $order = DB::table('orders')
+            ->select(DB::raw('COUNT(process_id) as count, process_id'))
+            ->whereNull('deleted_at')
+            ->groupBy('process_id');
+        $data = DB::table('order_processes')
+            ->select('count', 'name', 'process_id')
+            ->joinSub($order, 'op', function ($join) {
+                $join->on('order_processes.id', '=', 'op.process_id');
+            })->get();
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+
+
+
+
+        dd('done');
+        $number = range(0, 9);
+        shuffle($number);
+        $upercase = range('A', 'Z');
+        shuffle($upercase);
+        $lowercase = range('a', 'z');
+        shuffle($lowercase);
+        $code = [$number[0], $number[1], $number[2], $number[3], $upercase[0], $lowercase[0]];
+        shuffle($code);
+        dd(implode('', $code));
+
+        $user = User::find(16);
+        $test = $user->update(['user_name' => 'tôi là tôi 1']);
         // $user->delete();
         dd($test);
-        $v=Vouchers::find(6);
-        $v->users()->sync([1,2]);
+        $v = Vouchers::find(6);
+        $v->users()->sync([1, 2]);
         dd('done');
         // $order = Order::where('id',6)->first();
         // dd($order);
-    //  $model=Order::find(3);$model->load('feedback');
-    $model=Feedbacks::find(1);$model->load('order');
-     return response()->json([
-        'success'=>true,
-        'data' => $model
-    ]);
-    //  dd($model);
+        //  $model=Order::find(3);$model->load('feedback');
+        $model = Feedbacks::find(1);
+        $model->load('order');
+        return response()->json([
+            'success' => true,
+            'data' => $model
+        ]);
+        //  dd($model);
 
         $order = DB::table('orders')
             ->select(DB::raw('COUNT(process_id) as count, process_id'))
             ->groupBy('process_id');
         $data = DB::table('order_processes')
-            ->select('count','name','process_id')
+            ->select('count', 'name', 'process_id')
             ->joinSub($order, 'op', function ($join) {
                 $join->on('order_processes.id', '=', 'op.process_id');
             })->get();
         return response()->json([
-            'success'=>true,
+            'success' => true,
             'data' => $data
         ]);
 

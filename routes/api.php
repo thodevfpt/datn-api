@@ -42,6 +42,8 @@ use Illuminate\Support\Facades\Mail;
 |
 */
 // test api
+Route::get('analyticts',[TestController::class, 'demo']);
+Route::get('quantity/product/{year}', [AnalyticsController::class, 'ExportQuantityProduct']);
 Route::get('test', [TestController::class, 'testTime']);
 Route::get('send-mail', [TestController::class, 'sendMail']);
 Route::get('test-email', function () {
@@ -356,12 +358,16 @@ Route::middleware(['auth:sanctum', 'role:Admin|manager order|manager content|man
         Route::get('order/revenue/{month}/{year}', [AnalyticsController::class, 'revenue']);
         // thống kê so sánh số đơn hàng tạo mới và số đơn hàng hoàn thành theo thời gian
         Route::get('order/compare/create/success/{month}/{year}', [AnalyticsController::class, 'compareCreateSuccess']);
+            // thống kê số lượng sản phẩm đã bán
+        Route::get('quantity/product',[AnalyticsController::class, 'quantityProduct']);
     });
     // API export data
     Route::middleware(['role:Admin'])->prefix('export')->group(function () {
         // Route::prefix('export')->group(function () {
-        Route::get('order/revenue/{month}/{year}/{type}', [AnalyticsController::class, 'ExportOrderRevenue']);
-        Route::get('order/compare/create/success/{month}/{year}/{type}', [AnalyticsController::class, 'ExportCompareCreateSuccess']);
+        Route::get('order/revenue/{month}/{year}', [AnalyticsController::class, 'ExportOrderRevenue']);
+        Route::get('order/compare/create/success/{month}/{year}', [AnalyticsController::class, 'ExportCompareCreateSuccess']);
+        Route::get('quantity/product', [AnalyticsController::class, 'ExportQuantityProduct']);
+    
     });
     Route::prefix('feedback')->group(function () {
         // list ds feedback

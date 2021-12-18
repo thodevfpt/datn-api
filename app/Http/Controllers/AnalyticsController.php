@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\AnalyticRevenueExport;
+use App\Exports\AnalytictQuantityProduct;
 use App\Exports\CompareCreateSuccessExport;
 use App\Models\Order;
 use Carbon\Carbon;
@@ -108,8 +109,182 @@ class AnalyticsController extends Controller
         ]);
     }
 
+    // thống kê số lượng sp đã bán
+    public function quantityProduct(Request $request)
+    {
+        $day = $request->day;
+        $month = $request->month;
+        $year = $request->year;
+        $time = Carbon::create($day)->toDateString();
+        if ($day) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($time) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereDate('orders.time_shop_confirm', $time)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $data['name'][] = $m->standard_name;
+                    $data['value'][] = $m->sum;
+                }
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+
+                //  foreach ($model as $m) {
+                //     $dl = [
+                //         'name' => $m->standard_name,
+                //         'value' => $m->sum
+                //     ];
+                //     $data[] = $dl;
+                // }
+                // return Excel::download(new AnalyticRevenueExport($data), 'thong-ke-doanh-thu.xlsx');
+
+            }
+        } elseif ($month && $year) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($month, $year) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereYear('time_shop_confirm', $year)
+                        ->whereMonth('time_shop_confirm', $month)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $data['name'][] = $m->standard_name;
+                    $data['value'][] = $m->sum;
+                }
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+            }
+        } elseif ($year) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($year) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereYear('time_shop_confirm', $year)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $data['name'][] = $m->standard_name;
+                    $data['value'][] = $m->sum;
+                }
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+            }
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'no data'
+        ]);
+    }
+    // API export số lượng sản phẩm đã bán
+    public function ExportQuantityProduct(Request $request)
+    {
+        $day = $request->day;
+        $month = $request->month;
+        $year = $request->year;
+        $time = Carbon::create($day)->toDateString();
+        if ($day) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($time) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereDate('orders.time_shop_confirm', $time)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $dl = [
+                        'name' => $m->standard_name,
+                        'value' => $m->sum
+                    ];
+                    $data[] = $dl;
+                }
+                return Excel::download(new AnalytictQuantityProduct($data), "thong-ke-so-luong-$day.xlsx");
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'data' => 'no data'
+                ]);
+            }
+        } elseif ($month && $year) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($month, $year) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereYear('time_shop_confirm', $year)
+                        ->whereMonth('time_shop_confirm', $month)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $dl = [
+                        'name' => $m->standard_name,
+                        'value' => $m->sum
+                    ];
+                    $data[] = $dl;
+                }
+                return Excel::download(new AnalytictQuantityProduct($data), "thong-ke-so-luong-$month-$year.xlsx");
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'data' => 'no data'
+                ]);
+            }
+        } elseif ($year) {
+            $model = DB::table('order_details')
+                ->join('orders', function ($join) use ($year) {
+                    $join->on('orders.id', '=', 'order_details.order_id')
+                        ->whereYear('time_shop_confirm', $year)
+                        ->where('process_id', 5);
+                })
+                ->select(DB::raw('SUM(quantity) as sum, product_id,standard_name'))
+                ->groupBy('product_id', 'standard_name')
+                ->get();
+            if ($model->all()) {
+                foreach ($model as $m) {
+                    $dl = [
+                        'name' => $m->standard_name,
+                        'value' => $m->sum
+                    ];
+                    $data[] = $dl;
+                }
+                return Excel::download(new AnalytictQuantityProduct($data), "thong-ke-so-luong-$year.xlsx");
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'data' => 'no data'
+                ]);
+            }
+        }
+        return response()->json([
+            'success' => false,
+            'data' => 'dl không hợp lệ'
+        ]);
+    }
+
     // API export doanh thu
-    public function ExportOrderRevenue($month, $year, $type)
+    public function ExportOrderRevenue($month, $year)
     {
         // thống kê theo năm
         if ($month == 0) {
@@ -155,10 +330,10 @@ class AnalyticsController extends Controller
             }
         }
 
-        return Excel::download(new AnalyticRevenueExport($data), 'thong-ke-doanh-thu.' . $type);
+        return Excel::download(new AnalyticRevenueExport($data), 'thong-ke-doanh-thu.xlsx');
     }
     // EXPORT số lượng đơn hàng tạo mới và hoàn thành
-    public function ExportCompareCreateSuccess($month, $year, $type)
+    public function ExportCompareCreateSuccess($month, $year)
     {
         // thống kê theo năm
         if ($month == 0) {
@@ -204,6 +379,6 @@ class AnalyticsController extends Controller
                 $data[] = $dl;
             }
         }
-        return Excel::download(new CompareCreateSuccessExport($data), 'so-sanh-don-hang-tao-moi-hoan-thanh.' . $type);
+        return Excel::download(new CompareCreateSuccessExport($data), 'so-sanh-don-hang-tao-moi-hoan-thanh.xlsx');
     }
 }
